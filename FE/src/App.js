@@ -1,7 +1,6 @@
-import logo from "./logo.svg";
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import Rooms from "./Components/pages/Rooms/Rooms";
+import SearchRooms from "./Components/pages/SearchRooms/SearchRooms";
 import RoomDetails from "./Components/pages/RoomsDetails/RoomDetails";
 import Login from "./Components/Layout/Login/Login";
 import ThankYouPage from "./Components/pages/ThankYouPage/ThanKYouPage";
@@ -14,12 +13,14 @@ import AdminRooms from "./Components/pages/AdminPage/AdminRooms/AdminRooms";
 import AdminUser from "./Components/pages/AdminPage/AdminUser/AdminUser";
 import Home from "./Components/pages/Home/Home";
 import Dashboard from "./Components/pages/AdminPage/AdminDashBoard/DashBoard";
+import RoomsList from "./Components/pages/Rooms/Rooms";
 function App() {
   return (
     <>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/rooms" element={<Rooms />} />
+        <Route path="/rooms" element={<RoomsList />} />
+        <Route path="/searchrooms" element={<SearchRooms />} />
         <Route path="/rooms/:id" element={<RoomDetails />} />
         <Route path="/login" element={<Login />} />
         <Route path="/thank-you" element={<ThankYouPage />} />

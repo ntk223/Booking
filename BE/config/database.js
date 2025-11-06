@@ -1,16 +1,22 @@
-const mysql = require("mysql2");
+import { Sequelize } from "sequelize";
+import { env } from "./environment.js";
+const sequelize = new Sequelize(env.DB_NAME, env.DB_USER, env.DB_PASS, {
+  host: env.DB_HOST,
+  port: env.DB_PORT,
+  dialect: "mysql",
+  logging: false,  
+});
 
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "123456",
-  database: "meetingroombooking",
-});
-db.connect((err) => {
-  if (err) {
-    console.error("Database connection failed: ", err.stack);
-    return;
+async function connectToDatabase() {
+  try {
+    await sequelize.authenticate();
+    console.log("Connection has been established successfully.");
+  } catch (error) {
+    console.error("Unable to connect to the database:", error);
   }
-  console.log("Connected to My SQL database");
-});
-module.exports = db;
+}
+
+connectToDatabase();
+// await sequelize.sync({ alter: true });
+
+export default sequelize;

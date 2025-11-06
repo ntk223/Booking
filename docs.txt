@@ -1,0 +1,3 @@
+git checkout -b {name} origin/{name}
+( tao branch moi va checkout sang branch do )
+example: git checkout -b kien origin/kien

@@ -33,19 +33,19 @@ const RoomDetails = () => {
       });
 
     // Lấy thông tin thiết bị trong phòng
-    axios
-      .get(`http://localhost:5000/api/rooms/${id}/equipment`)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data.equipment)) {
-          setEquipment(response.data.equipment);
-        } else {
-          console.error("Dữ liệu thiết bị không hợp lệ");
-          setEquipment([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Lỗi khi lấy thông tin thiết bị:", error);
-      });
+    // axios
+    //   .get(`http://localhost:5000/api/rooms/${id}/equipment`)
+    //   .then((response) => {
+    //     if (response.data && Array.isArray(response.data.equipment)) {
+    //       setEquipment(response.data.equipment);
+    //     } else {
+    //       console.error("Dữ liệu thiết bị không hợp lệ");
+    //       setEquipment([]);
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     console.error("Lỗi khi lấy thông tin thiết bị:", error);
+    //   });
   }, [id]);
 
   // Định dạng ngày theo dd-MM-yy
@@ -163,12 +163,13 @@ const RoomDetails = () => {
           <div className="equipment-section">
             <h2>Trang thiết bị</h2>
             <div className="equipment-grid">
-              {equipment.map((item, index) => (
+              {/* {equipment.map((item, index) => (
                 <div key={index} className="equipment-item">
                   <h3>{item.name}</h3>
                   <p>{item.description}</p>
                 </div>
-              ))}
+              ))} */}
+              Máy chiếu, Micro
             </div>
           </div>
 

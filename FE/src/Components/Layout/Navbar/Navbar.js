@@ -34,8 +34,9 @@ function Navbar() {
           <Link to="/" className="navLink">
             Trang chủ
           </Link>
-          <Link to="/rooms" className="navLink">
-            Phòng họp Hà Nội
+          <Link to="/rooms" className="navLink">Phòng họp Hà Nội</Link>
+          <Link to="/searchrooms" className="navLink">
+            Tìm phòng
           </Link>
           <Link className="navLink" to="/aboutUs">
             Về chúng tôi

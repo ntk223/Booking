@@ -1,35 +1,27 @@
-const express = require("express");
-const cors = require("cors");
-const roomRoutes = require("./routes/roomRoutes");
-const db = require("./config/database");
-const session = require("express-session");
-const bodyParser = require("body-parser");
-const app = express();
-const dotenv = require("dotenv");
-dotenv.config();
-const authRoutes = require("./routes/authRoutes");
-const booking = require("./routes/bookingRoutes");
-const emailRoutes = require("./routes/emailsRoutes");
-const AdminRoomRoutes = require("./routes/AdminRoomRoutes");
-const AdminUserRoutes = require("./routes/AdminUserRoutes");
-app.use(express.json());
-app.use(cors());
+import express from 'express'
+import { APIs } from './routes/index.js'
+// import sequelize from './config/database.js'
+import { env } from './config/environment.js'
+import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware.js'
+import { corsOptions } from './config/cors.js'
+// import { swaggerDocs } from './config/swagger.js'
+import cors from 'cors'
+const START_SERVER = () => {
+    
+    const app = express ()
+    app.use (cors(corsOptions))
+    app.use (express.json())
+    app.use ('/api', APIs)
 
-const PORT = 5000;
-app.use(
-  session({
-    secret: "secret_key",
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 3600000 },
-  })
-);
-app.use(bodyParser.json());
-app.use("/api", roomRoutes);
-app.use("/api", authRoutes);
-app.use("/api", booking);
-// app.use("/api", emailRoutes);
-app.use("/api", AdminRoomRoutes);
-app.use("/api", AdminUserRoutes);
+    // Xử lý lỗi tập trung trong ứng dụng
+    app.use (errorHandlingMiddleware)
+    // Tài liệu API với Swagger
+    // swaggerDocs (app)
+    // Kết nối Database
+    app.listen(env.APP_PORT, () => {
+        console.log(`Server is running on port ${env.APP_PORT}`)
+    })
 
-app.listen(PORT, () => console.log(`Backend chạy trên cổng ${PORT}`));
+}
+
+START_SERVER ()
