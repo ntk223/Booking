@@ -6,12 +6,20 @@ import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware.j
 import { corsOptions } from './config/cors.js'
 // import { swaggerDocs } from './config/swagger.js'
 import cors from 'cors'
+import { metricsMiddleware, metricsEndpoint } from './utils/metrics.js';
+
 const START_SERVER = () => {
     
     const app = express ()
     app.use (cors(corsOptions))
     app.use (express.json())
+    // --- Metrics middleware ---
+    app.use(metricsMiddleware);
+    app.get("/metrics", metricsEndpoint);
     app.use ('/api', APIs)
+
+    
+    // --- End metrics ---
 
     // Xử lý lỗi tập trung trong ứng dụng
     app.use (errorHandlingMiddleware)
