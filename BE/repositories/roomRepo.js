@@ -6,10 +6,11 @@ class RoomRepository {
     }
 
 async getRoomDetails(roomId = null) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
   const whereClause = roomId ? { id: roomId } : {};
 
   const rooms = await Room.findAll({
-    attributes: ['id', 'name', 'location', 'capacity', 'imageUrl'],
+    attributes: ['id', 'name', 'location', 'capacity', 'imageUrl', 'price'],
     include: [
       {
         model: District,
@@ -35,6 +36,7 @@ async getRoomDetails(roomId = null) {
     imageUrl: room.imageUrl,
     district: room.district?.name || null,
     equipments: room.equipments.map(e => e.name),
+    price: room.price,
   }));
 }
 

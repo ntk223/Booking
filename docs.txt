@@ -1,3 +1,12 @@
 git checkout -b {name} origin/{name}
 ( tao branch moi va checkout sang branch do )
 example: git checkout -b kien origin/kien
+
+/test request
+read query -> require less time (200 user - 5s - 5 loop ) -> slowdown
+write query -> require more time
+rm -rf report result.jtl && mkdir report && jmeter -n -t test.jmx -l result.jtl -e -o report
+
+
+timeresponse ~ 700ms ( mean ) ( 200 user - 5s - 3 loop )
+
