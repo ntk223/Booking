@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../Layout/Navbar/Navbar";
-import { Modal, Button, message } from "antd";
+import { Modal, Button, message,Spin } from "antd";
 import { format } from "date-fns"; // Import hàm format từ date-fns
 import { Phone, Users, MapPin, DollarSign } from "lucide-react";
 import "./RoomDetails.css";
@@ -11,11 +11,10 @@ const RoomDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [room, setRoom] = useState({});
-  const [equipment, setEquipment] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const location = useLocation();
   const { roomId, date, startTime, endTime } = location.state || {};
-
+  const [loading, setLoading] = useState(true);
   // Lấy thông tin người dùng từ sessionStorage
   const user = sessionStorage.getItem("user");
   const userId = user ? JSON.parse(user).user.id : null;
@@ -24,12 +23,15 @@ const RoomDetails = () => {
   useEffect(() => {
     // Lấy thông tin phòng
     axios
-      .get(`http://localhost:5000/api/rooms/${id}`)
+      .get(`http://localhost:5000/api/room/${id}`)
       .then((response) => {
-        setRoom(response.data);
+        console.log(response);
+        setRoom(response.data[0]);
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Lỗi khi lấy thông tin phòng:", error);
+        setLoading(false);
       });
 
     // Lấy thông tin thiết bị trong phòng
@@ -69,7 +71,7 @@ const RoomDetails = () => {
 
       // Gửi yêu cầu POST để tạo booking
       const bookingResponse = await axios.post(
-        "http://localhost:5000/api/bookings",
+        "http://localhost:5000/api/booking",
         bookingData
       );
 
@@ -112,7 +114,13 @@ const RoomDetails = () => {
       message.error("Vui lòng đăng nhập để đặt phòng.");
     }
   };
-
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", padding: "50px" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
   return (
     <>
       <Navbar />
@@ -147,7 +155,7 @@ const RoomDetails = () => {
               <MapPin className="icon" />
               <div className="info-content">
                 <p className="label">Quận</p>
-                <p className="value">{room.district_name}</p>
+                <p className="value">{room.district}</p>
               </div>
             </div>
             <div className="info-item">
@@ -163,13 +171,11 @@ const RoomDetails = () => {
           <div className="equipment-section">
             <h2>Trang thiết bị</h2>
             <div className="equipment-grid">
-              {/* {equipment.map((item, index) => (
-                <div key={index} className="equipment-item">
-                  <h3>{item.name}</h3>
-                  <p>{item.description}</p>
+              {room.equipments ? room.equipments.map((eq, index) => (
+                <div className="equipment-item" key={index}>
+                  {eq.trim()}
                 </div>
-              ))} */}
-              Máy chiếu, Micro
+              )) : <p>Máy chiếu, Micro</p>}
             </div>
           </div>
 

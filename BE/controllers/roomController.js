@@ -56,6 +56,7 @@ export class RoomController {
         try {
             const criteria = req.body;
             const rooms = await roomService.searchRooms(criteria);
+            // console.log("Rooms found:", "a");
             res.status(StatusCodes.OK).json(rooms);
         } catch (error) {
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });

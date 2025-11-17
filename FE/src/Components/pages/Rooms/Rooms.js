@@ -15,7 +15,7 @@ const RoomsList = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/list");
+        const res = await axios.get("http://localhost:5000/api/room");
         setRooms(res.data);
       } catch (error) {
         console.error("Error fetching rooms:", error);
@@ -75,7 +75,6 @@ const RoomsList = () => {
                         <strong>Thiết bị:</strong>
                       </p>
                       {room.equipments
-                        ?.split(",")
                         .map((eq, i) => (
                           <Tag color="blue" key={i}>
                             {eq.trim()}
