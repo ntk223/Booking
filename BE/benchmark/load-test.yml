@@ -1,0 +1,105 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    # Warm-up phase
+    - duration: 30
+      arrivalRate: 5
+      name: "Warm up"
+    # Load phase - normal traffic
+    - duration: 60
+      arrivalRate: 20
+      name: "Normal load"
+    # Stress phase - high traffic
+    - duration: 60
+      arrivalRate: 50
+      name: "High load"
+    # Spike phase - sudden burst
+    - duration: 30
+      arrivalRate: 100
+      name: "Spike test"
+    # Cool down
+    - duration: 30
+      arrivalRate: 5
+      name: "Cool down"
+  
+  # Performance thresholds
+  ensure:
+    maxErrorRate: 1  # Max 1% error rate
+    p95: 500         # 95th percentile under 500ms
+    p99: 1000        # 99th percentile under 1000ms
+
+scenarios:
+  # Test 1: Get all rooms (most common operation)
+  - name: "Get All Rooms"
+    weight: 40
+    flow:
+      - get:
+          url: "/api/room"
+          capture:
+            - json: "$[0].id"
+              as: "roomId"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: length
+
+  # Test 2: Get specific room details
+  - name: "Get Room Details"
+    weight: 25
+    flow:
+      - get:
+          url: "/api/room"
+          capture:
+            - json: "$[0].id"
+              as: "roomId"
+      - get:
+          url: "/api/room/{{ roomId }}"
+          expect:
+            - statusCode: 200
+
+  # Test 3: Search rooms (complex query)
+  - name: "Search Available Rooms"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/room/search"
+          json:
+            capacity: 20
+            districtId: 1
+            searchDate: "2025-11-25"
+            startTime: "09:00"
+            endTime: "11:00"
+          expect:
+            - statusCode: 200
+
+  # Test 4: Get all bookings
+  - name: "Get All Bookings"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/booking"
+          expect:
+            - statusCode: 200
+
+  # Test 5: Create booking (write operation - potential race condition)
+  - name: "Create Booking"
+    weight: 5
+    flow:
+      - get:
+          url: "/api/room"
+          capture:
+            - json: "$[0].id"
+              as: "roomId"
+      - post:
+          url: "/api/booking"
+          json:
+            roomId: "{{ roomId }}"
+            userId: "{{ $randomNumber(404, 503) }}"
+            date: "2025-12-{{ $randomNumber(1, 28) }}"
+            startTime: "{{ $randomNumber(9, 16) }}:00"
+            endTime: "{{ $randomNumber(10, 17) }}:00"
+            purpose: "Performance test booking"
+          expect:
+            - statusCode: 
+                - 201
+                - 500  # May fail due to conflicts

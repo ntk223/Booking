@@ -1,45 +1,65 @@
 import {Booking, User, Room} from "../models/Model.js";
 import { Op } from "sequelize";
+import sequelize from "../config/database.js";
+
 class BookingRepository {
     async createBooking(bookingData) {
-        const existingBookings = await Booking.findAll({
-            where: {
-                roomId: bookingData.roomId,
-                bookingDate: bookingData.date,
-                [Op.or]: [
-                    {
-                        startTime: {
-                            [Op.between]: [bookingData.startTime, bookingData.endTime],
-                        },
-                    },
-                    {
-                        endTime: {
-                            [Op.between]: [bookingData.startTime, bookingData.endTime],
-                        },
-                    },
-                    {
-                        [Op.and]: [
-                            {
-                                startTime: {
-                                    [Op.lte]: bookingData.startTime,
-                                },
-                            },
-                            {
-                                endTime: {
-                                    [Op.gte]: bookingData.endTime,
-                                },
-                            },
-                        ],
-                    },
-                ],
-            },
-        });
-
-        if (existingBookings.length > 0) {
-            throw new Error("Room is already booked for the selected time slot.");
+        // Input validation
+        if (!bookingData.roomId || !bookingData.userId || !bookingData.date || !bookingData.startTime || !bookingData.endTime) {
+            throw new Error("Missing required fields: roomId, userId, date, startTime, endTime");
         }
 
-        return await Booking.create(bookingData);
+        // Validate time range
+        if (bookingData.startTime >= bookingData.endTime) {
+            throw new Error("End time must be after start time");
+        }
+
+        // Use transaction with SELECT FOR UPDATE to prevent race conditions
+        return await sequelize.transaction(async (t) => {
+            const existingBookings = await Booking.findAll({
+                where: {
+                    roomId: bookingData.roomId,
+                    date: bookingData.date,
+                    status: {
+                        [Op.ne]: 'cancelled'
+                    },
+                    [Op.or]: [
+                        {
+                            startTime: {
+                                [Op.between]: [bookingData.startTime, bookingData.endTime],
+                            },
+                        },
+                        {
+                            endTime: {
+                                [Op.between]: [bookingData.startTime, bookingData.endTime],
+                            },
+                        },
+                        {
+                            [Op.and]: [
+                                {
+                                    startTime: {
+                                        [Op.lte]: bookingData.startTime,
+                                    },
+                                },
+                                {
+                                    endTime: {
+                                        [Op.gte]: bookingData.endTime,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+                lock: t.LOCK.UPDATE,
+                transaction: t
+            });
+
+            if (existingBookings.length > 0) {
+                throw new Error("Room is already booked for the selected time slot.");
+            }
+
+            return await Booking.create(bookingData, { transaction: t });
+        });
     }
     async getBookingDetails(bookingId = null) {
         const whereClause = bookingId ? { id: bookingId } : {};
