@@ -1,6 +1,7 @@
 import {Booking, User, Room} from "../models/Model.js";
 import { Op } from "sequelize";
 import sequelize from "../config/database.js";
+import redisClient from "../config/redis.js";
 
 class BookingRepository {
     async createBooking(bookingData) {
@@ -14,8 +15,26 @@ class BookingRepository {
             throw new Error("End time must be after start time");
         }
 
-        // Use transaction with SELECT FOR UPDATE to prevent race conditions
-        return await sequelize.transaction(async (t) => {
+        // Create distributed lock key
+        const lockKey = `booking:lock:${bookingData.roomId}:${bookingData.date}:${bookingData.startTime}`;
+        const lockValue = `${Date.now()}-${Math.random()}`;
+        const lockTTL = 10; // 10 seconds TTL
+
+        let lockAcquired = false;
+
+        try {
+            // Try to acquire distributed lock using Redis
+            lockAcquired = await redisClient.set(lockKey, lockValue, {
+                EX: lockTTL,
+                NX: true  // Only set if not exists
+            });
+
+            if (!lockAcquired) {
+                throw new Error("Another booking is in progress for this time slot. Please try again.");
+            }
+
+            // Use database transaction with Redis lock for double protection
+            return await sequelize.transaction(async (t) => {
             const existingBookings = await Booking.findAll({
                 where: {
                     roomId: bookingData.roomId,
@@ -60,6 +79,22 @@ class BookingRepository {
 
             return await Booking.create(bookingData, { transaction: t });
         });
+        } catch (error) {
+            throw error;
+        } finally {
+            // Release Redis lock if we acquired it
+            if (lockAcquired) {
+                try {
+                    const currentValue = await redisClient.get(lockKey);
+                    // Only delete if we still own the lock
+                    if (currentValue === lockValue) {
+                        await redisClient.del(lockKey);
+                    }
+                } catch (err) {
+                    console.error('[ERROR] Failed to release Redis lock:', err.message);
+                }
+            }
+        }
     }
     async getBookingDetails(bookingId = null) {
         const whereClause = bookingId ? { id: bookingId } : {};

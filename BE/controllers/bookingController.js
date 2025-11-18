@@ -9,6 +9,7 @@ class BookingController {
         } catch (error) {
             // Handle specific error types
             if (error.message.includes("already booked") || 
+                error.message.includes("Another booking is in progress") ||
                 error.message.includes("Missing required fields") ||
                 error.message.includes("End time must be after start time")) {
                 res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
