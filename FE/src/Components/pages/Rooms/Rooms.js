@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Row, Col, Spin, Tag } from "antd";
+import { Card, Row, Col, Spin, Tag, Pagination } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // ✅ Thêm dòng này
 import Navbar from "../../Layout/Navbar/Navbar";
@@ -10,13 +10,17 @@ const { Meta } = Card;
 const RoomsList = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate(); // ✅ Dùng để điều hướng
 
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/room");
-        setRooms(res.data);
+        const res = await axios.get(`http://localhost:5000/api/room?page=${pageNumber}`);
+        setRooms(res.data.rooms);
+        setPageNumber(res.data.currentPage);
+        setTotalPages(res.data.totalPages);
       } catch (error) {
         console.error("Error fetching rooms:", error);
       } finally {
@@ -25,7 +29,7 @@ const RoomsList = () => {
     };
 
     fetchRooms();
-  }, []);
+  }, [pageNumber]);
 
   if (loading) {
     return (
@@ -87,6 +91,24 @@ const RoomsList = () => {
             </Col>
           ))}
         </Row>
+        
+        <div style={{ textAlign: "center", marginTop: "24px" }}>
+          <Pagination
+            current={pageNumber}
+            total={totalPages * 20} // Assuming 20 items per page
+            pageSize={20}
+            onChange={(page) => {
+              setPageNumber(page);
+              setLoading(true);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            showSizeChanger={false}
+            showQuickJumper
+            showTotal={(total, range) => 
+              `${range[0]}-${range[1]} của ${total} phòng`
+            }
+          />
+        </div>
       </div>
       <Footer />
     </>
