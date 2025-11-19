@@ -7,7 +7,17 @@ class BookingController {
             const newBooking = await bookingService.createBooking(bookingData);
             res.status(StatusCodes.CREATED).json(newBooking);
         } catch (error) {
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+            // Handle specific error types
+            if (error.message.includes("already booked") || 
+                error.message.includes("Another booking is in progress") ||
+                error.message.includes("Missing required fields") ||
+                error.message.includes("End time must be after start time")) {
+                res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+            } else if (error.message.includes("foreign key constraint")) {
+                res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid room or user ID" });
+            } else {
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+            }
         }
     }
 

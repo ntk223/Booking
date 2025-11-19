@@ -1,0 +1,81 @@
+{
+  "timestamp": "2025-11-18T04:45:35.777Z",
+  "current": {
+    "stats": {
+      "totalRequests": 1000,
+      "avgDuration": "11.14",
+      "minDuration": 0,
+      "maxDuration": 137,
+      "p50": 7,
+      "p95": 31,
+      "p99": 60,
+      "slowRequests": 0,
+      "errorRate": "3.10%"
+    },
+    "topSlowEndpoints": [
+      {
+        "method": "POST",
+        "url": "/api/booking",
+        "duration": 137,
+        "statusCode": 400
+      },
+      {
+        "method": "POST",
+        "url": "/api/booking",
+        "duration": 88,
+        "statusCode": 400
+      },
+      {
+        "method": "POST",
+        "url": "/api/booking",
+        "duration": 69,
+        "statusCode": 400
+      },
+      {
+        "method": "POST",
+        "url": "/api/booking",
+        "duration": 68,
+        "statusCode": 400
+      },
+      {
+        "method": "GET",
+        "url": "/api/room",
+        "duration": 65,
+        "statusCode": 200
+      },
+      {
+        "method": "GET",
+        "url": "/api/room",
+        "duration": 65,
+        "statusCode": 200
+      },
+      {
+        "method": "GET",
+        "url": "/api/room",
+        "duration": 64,
+        "statusCode": 200
+      },
+      {
+        "method": "POST",
+        "url": "/api/booking",
+        "duration": 62,
+        "statusCode": 400
+      },
+      {
+        "method": "GET",
+        "url": "/api/booking",
+        "duration": 60,
+        "statusCode": 200
+      },
+      {
+        "method": "GET",
+        "url": "/api/room",
+        "duration": 60,
+        "statusCode": 200
+      }
+    ],
+    "timestamp": "2025-11-18T04:45:35.772Z"
+  },
+  "previous": null,
+  "comparison": null
+}

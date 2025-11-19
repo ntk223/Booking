@@ -1,45 +1,100 @@
 import {Booking, User, Room} from "../models/Model.js";
 import { Op } from "sequelize";
+import sequelize from "../config/database.js";
+import redisClient from "../config/redis.js";
+
 class BookingRepository {
     async createBooking(bookingData) {
-        const existingBookings = await Booking.findAll({
-            where: {
-                roomId: bookingData.roomId,
-                bookingDate: bookingData.date,
-                [Op.or]: [
-                    {
-                        startTime: {
-                            [Op.between]: [bookingData.startTime, bookingData.endTime],
-                        },
-                    },
-                    {
-                        endTime: {
-                            [Op.between]: [bookingData.startTime, bookingData.endTime],
-                        },
-                    },
-                    {
-                        [Op.and]: [
-                            {
-                                startTime: {
-                                    [Op.lte]: bookingData.startTime,
-                                },
-                            },
-                            {
-                                endTime: {
-                                    [Op.gte]: bookingData.endTime,
-                                },
-                            },
-                        ],
-                    },
-                ],
-            },
-        });
-
-        if (existingBookings.length > 0) {
-            throw new Error("Room is already booked for the selected time slot.");
+        // Input validation
+        if (!bookingData.roomId || !bookingData.userId || !bookingData.date || !bookingData.startTime || !bookingData.endTime) {
+            throw new Error("Missing required fields: roomId, userId, date, startTime, endTime");
         }
 
-        return await Booking.create(bookingData);
+        // Validate time range
+        if (bookingData.startTime >= bookingData.endTime) {
+            throw new Error("End time must be after start time");
+        }
+
+        // Create distributed lock key
+        const lockKey = `booking:lock:${bookingData.roomId}:${bookingData.date}:${bookingData.startTime}`;
+        const lockValue = `${Date.now()}-${Math.random()}`;
+        const lockTTL = 10; // 10 seconds TTL
+
+        let lockAcquired = false;
+
+        try {
+            // Try to acquire distributed lock using Redis
+            lockAcquired = await redisClient.set(lockKey, lockValue, {
+                EX: lockTTL,
+                NX: true  // Only set if not exists
+            });
+
+            if (!lockAcquired) {
+                throw new Error("Another booking is in progress for this time slot. Please try again.");
+            }
+
+            // Use database transaction with Redis lock for double protection
+            return await sequelize.transaction(async (t) => {
+            const existingBookings = await Booking.findAll({
+                where: {
+                    roomId: bookingData.roomId,
+                    date: bookingData.date,
+                    status: {
+                        [Op.ne]: 'cancelled'
+                    },
+                    [Op.or]: [
+                        {
+                            startTime: {
+                                [Op.between]: [bookingData.startTime, bookingData.endTime],
+                            },
+                        },
+                        {
+                            endTime: {
+                                [Op.between]: [bookingData.startTime, bookingData.endTime],
+                            },
+                        },
+                        {
+                            [Op.and]: [
+                                {
+                                    startTime: {
+                                        [Op.lte]: bookingData.startTime,
+                                    },
+                                },
+                                {
+                                    endTime: {
+                                        [Op.gte]: bookingData.endTime,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+                lock: t.LOCK.UPDATE,
+                transaction: t
+            });
+
+            if (existingBookings.length > 0) {
+                throw new Error("Room is already booked for the selected time slot.");
+            }
+
+            return await Booking.create(bookingData, { transaction: t });
+        });
+        } catch (error) {
+            throw error;
+        } finally {
+            // Release Redis lock if we acquired it
+            if (lockAcquired) {
+                try {
+                    const currentValue = await redisClient.get(lockKey);
+                    // Only delete if we still own the lock
+                    if (currentValue === lockValue) {
+                        await redisClient.del(lockKey);
+                    }
+                } catch (err) {
+                    console.error('[ERROR] Failed to release Redis lock:', err.message);
+                }
+            }
+        }
     }
     async getBookingDetails(bookingId = null) {
         const whereClause = bookingId ? { id: bookingId } : {};
