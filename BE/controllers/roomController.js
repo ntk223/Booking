@@ -14,8 +14,9 @@ export class RoomController {
 
     async getAllRooms(req, res) {
         try {
-            const rooms = await roomService.getAllRooms();
-            res.status(StatusCodes.OK).json(rooms);
+            const pageNumber = parseInt(req.query.page) || 1;
+            const data = await roomService.getAllRooms(pageNumber);
+            res.status(StatusCodes.OK).json(data);
         } catch (error) {
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
         }

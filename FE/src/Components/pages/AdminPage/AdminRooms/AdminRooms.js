@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Form, Input, Modal, Tag, Select, message } from "antd";
+import { Table, Button, Form, Input, Modal, Tag, Select, message, Pagination } from "antd";
 import Sidebar from "../../../Layout/Admin/Sidebar/Sidebar";
 import Header from "../../../Layout/Admin/Header/Header";
 import axios from "axios";
 import "./AdminRooms.css";
 import { AiFillDelete } from "react-icons/ai";
 
-const API_URL = "http://localhost:5000/api/adminrooms";
-const DISTRICT_API_URL = "http://localhost:5000/api/districts";
+const API_URL = "http://localhost:5000/api/room";
+// const DISTRICT_API_URL = "http://localhost:5000/api/districts";
 
 const AdminRooms = () => {
   const [rooms, setRooms] = useState([]);
@@ -15,21 +15,40 @@ const AdminRooms = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [form] = Form.useForm(); // Khởi tạo form instance
 
-  const fetchRooms = async () => {
+  const fetchRooms = async (page = currentPage) => {
+    setLoading(true);
     try {
-      const response = await axios.get(API_URL);
-      setRooms(response.data);
+      const response = await axios.get(`${API_URL}?page=${page}`);
+      setRooms(response.data.rooms);
+      setCurrentPage(response.data.currentPage);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       message.error("Lỗi khi lấy danh sách phòng.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchDistricts = async () => {
     try {
-      const response = await axios.get(DISTRICT_API_URL);
-      setDistricts(response.data);
+      // const response = await axios.get(DISTRICT_API_URL);
+      // setDistricts(response.data);
+      // For now, using mock data since DISTRICT_API_URL is commented
+      setDistricts([
+        { id: 1, name: "Ba Đình" },
+        { id: 2, name: "Hoàn Kiếm" },
+        { id: 3, name: "Hai Bà Trưng" },
+        { id: 4, name: "Đống Đa" },
+        { id: 5, name: "Cầu Giấy" },
+        { id: 6, name: "Thanh Xuân" },
+        { id: 7, name: "Nam Từ Liêm" },
+        { id: 8, name: "Bắc Từ Liêm" },
+      ]);
     } catch (error) {
       message.error("Lỗi khi lấy danh sách quận.");
     }
@@ -38,7 +57,7 @@ const AdminRooms = () => {
   useEffect(() => {
     fetchRooms();
     fetchDistricts();
-  }, []);
+  }, [currentPage]);
 
   const handleAddRoom = async (values) => {
     try {
@@ -48,7 +67,7 @@ const AdminRooms = () => {
       });
       message.success("Thêm phòng thành công!");
       setIsAddModalVisible(false);
-      fetchRooms();
+      fetchRooms(1); // Reset to first page after adding
     } catch (error) {
       message.error("Lỗi khi thêm phòng.");
     }
@@ -58,7 +77,7 @@ const AdminRooms = () => {
     try {
       const response = await axios.put(`${API_URL}/${selectedRoom.id}`, {
         ...values,
-        district_id: values.districtId,
+        // district_id: values.districtId,
       });
       setRooms(
         rooms.map((room) =>
@@ -68,7 +87,7 @@ const AdminRooms = () => {
       message.success("Cập nhật phòng thành công!");
       setIsModalVisible(false);
       setSelectedRoom(null);
-      fetchRooms();
+      fetchRooms(currentPage);
     } catch (error) {
       message.error("Lỗi khi cập nhật phòng.");
     }
@@ -77,8 +96,8 @@ const AdminRooms = () => {
   const handleDeleteRoom = async (id) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
-      setRooms(rooms.filter((room) => room.id !== id));
       message.success("Xóa phòng thành công!");
+      fetchRooms(currentPage);
     } catch (error) {
       message.error("Lỗi khi xóa phòng.");
     }
@@ -89,12 +108,8 @@ const AdminRooms = () => {
     { title: "Vị trí", dataIndex: "location", key: "location" },
     {
       title: "Quận",
-      dataIndex: "district_id",
-      key: "district_id",
-      render: (districtId) => {
-        const district = districts.find((d) => d.id === districtId);
-        return district ? district.name : "Chưa có quận";
-      },
+      dataIndex: "district",
+      key: "district"
     },
     { title: "Sức chứa", dataIndex: "capacity", key: "capacity" },
     {
@@ -147,7 +162,28 @@ const AdminRooms = () => {
           >
             Thêm phòng
           </Button>
-          <Table dataSource={rooms} columns={columns} rowKey="id" />
+          <Table 
+            dataSource={rooms} 
+            columns={columns} 
+            rowKey="id"
+            loading={loading}
+            pagination={{
+              current: currentPage,
+              total: totalPages * 20, // Assuming 20 items per page
+              pageSize: 20,
+              onChange: (page) => {
+                setCurrentPage(page);
+                setLoading(true);
+                fetchRooms(page);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              },
+              showSizeChanger: false,
+              showQuickJumper: true,
+              showTotal: (total, range) => 
+                `${range[0]}-${range[1]} của ${total} phòng`
+            }}
+          />
+        
 
           {/* Modal cập nhật phòng */}
           <Modal
@@ -177,11 +213,11 @@ const AdminRooms = () => {
                   <Input />
                 </Form.Item>
                 <Form.Item
-                  name="districtId"
+                  name="district"
                   label="Quận"
                   rules={[{ required: true }]}
                 >
-                  <Select defaultValue={selectedRoom.district_id}>
+                  <Select defaultValue={selectedRoom.district}>
                     {districts.map((district) => (
                       <Select.Option key={district.id} value={district.id}>
                         {district.name}

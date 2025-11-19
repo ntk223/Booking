@@ -1,15 +1,26 @@
 import {Room, District, Equipment, Booking, sequelize} from "../models/Model.js";
 import { Op } from "sequelize";
+const PAGE_SIZE = 20;
 class RoomRepository {
     async createRoom(roomData) {
-        return await Room.create(roomData);
+        const totalRooms = await Room.count();
+        const totalRoomsBeforeAtPage = totalRooms % PAGE_SIZE;
+        const currentPage = Math.ceil((totalRooms + 1) / PAGE_SIZE);
+        const roomCreated = await Room.create(roomData);
+        if (totalRoomsBeforeAtPage === 0 && totalRooms !== 0) {
+            // New page created
+            return { roomCreated, currentPage: null};
+        }
+        return { roomCreated, currentPage };
     }
 
-async getRoomDetails(roomId = null) {
+async getRoomDetails(roomId = null, pageNumber = 1) {
+    console.log(pageNumber);
     await new Promise(resolve => setTimeout(resolve, 1000));
-  const whereClause = roomId ? { id: roomId } : {};
+  const limit = PAGE_SIZE;
+  const offset = (pageNumber - 1) * PAGE_SIZE;
 
-  const rooms = await Room.findAll({
+  const query = {
     attributes: ['id', 'name', 'location', 'capacity', 'imageUrl', 'price'],
     include: [
       {
@@ -25,29 +36,60 @@ async getRoomDetails(roomId = null) {
         required: false,
       },
     ],
-    where: whereClause,
-  });
+  }
+    if (roomId) { 
+        query.where = { id: roomId };
+    }
+    else {
+        query.limit = limit;
+        query.offset = offset;
+    }
+    
+  const rooms = await Room.findAll(query);
 
-  return rooms.map(room => ({
-    id: room.id,
-    name: room.name,
-    location: room.location,
-    capacity: room.capacity,
-    imageUrl: room.imageUrl,
-    district: room.district?.name || null,
-    equipments: room.equipments.map(e => e.name),
-    price: room.price,
-  }));
+  return {
+    rooms: rooms.map(room => ({
+                        id: room.id,
+                        name: room.name,
+                        location: room.location,
+                        capacity: room.capacity,
+                        imageUrl: room.imageUrl,
+                        district: room.district?.name || null,
+                        equipments: room.equipments.map(e => e.name),
+                        price: room.price,
+                    })),
+        currentPage: pageNumber,
+        totalPages: Math.ceil(await Room.count() / PAGE_SIZE)
+};
 }
 
 
 
     async deleteRoom(roomId) {
-        return await Room.destroy({ where: { id: roomId } });
+        const roomBefore = await Room.findAll({
+            where :{
+                id : {
+                    [Op.lt]: roomId
+                }
+            }
+        })
+        const totalPages = Math.ceil(await Room.count() / PAGE_SIZE);
+        const currentPage = Math.ceil((roomBefore.length + 1) / PAGE_SIZE);
+        await Room.destroy({ where: { id: roomId } });
+        return { totalPages, currentPage  };
     }
 
     async updateRoom(roomId, updatedData) {
-        return await Room.update(updatedData, { where: { id: roomId } });
+
+        const roomBefore = await Room.findAll({
+            where :{
+                id : {
+                    [Op.lt]: roomId
+                }
+            }
+        })
+        const currentPage = Math.ceil((roomBefore.length + 1) / PAGE_SIZE);
+        return {room : await Room.update(updatedData, { where: { id: roomId } }), currentPage};
     }
 
     /**
