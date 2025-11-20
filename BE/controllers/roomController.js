@@ -14,7 +14,7 @@ export class RoomController {
 
     async getAllRooms(req, res) {
         try {
-            const pageNumber = parseInt(req.query.page) || 1;
+            const pageNumber = parseInt(req.query.page);
             const data = await roomService.getAllRooms(pageNumber);
             res.status(StatusCodes.OK).json(data);
         } catch (error) {
