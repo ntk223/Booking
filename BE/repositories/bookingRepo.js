@@ -1,7 +1,7 @@
 import {Booking, User, Room} from "../models/Model.js";
 import { Op } from "sequelize";
 import sequelize from "../config/database.js";
-import redisClient from "../config/redis.js";
+import { rawRedisClient } from "../config/redis.js";
 
 class BookingRepository {
     async createBooking(bookingData) {
@@ -24,7 +24,7 @@ class BookingRepository {
 
         try {
             // Try to acquire distributed lock using Redis
-            lockAcquired = await redisClient.set(lockKey, lockValue, {
+            lockAcquired = await rawRedisClient.set(lockKey, lockValue, {
                 EX: lockTTL,
                 NX: true  // Only set if not exists
             });
@@ -85,10 +85,10 @@ class BookingRepository {
             // Release Redis lock if we acquired it
             if (lockAcquired) {
                 try {
-                    const currentValue = await redisClient.get(lockKey);
+                    const currentValue = await rawRedisClient.get(lockKey);
                     // Only delete if we still own the lock
                     if (currentValue === lockValue) {
-                        await redisClient.del(lockKey);
+                        await rawRedisClient.del(lockKey);
                     }
                 } catch (err) {
                     console.error('[ERROR] Failed to release Redis lock:', err.message);
