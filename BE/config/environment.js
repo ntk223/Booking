@@ -15,4 +15,10 @@ export const env = {
     REDIS_PORT: process.env.REDIS_PORT || 6379,
     REDIS_HOST: process.env.REDIS_HOST || '127.0.0.1',
     // CACHE_EXPIRATION: process.env.CACHE_EXPIRATION,
+    
+    // Circuit Breaker Configuration
+    CIRCUIT_BREAKER_FAILURE_THRESHOLD: parseFloat(process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD) || 0.5,  // 50% error rate
+    CIRCUIT_BREAKER_WINDOW_SIZE: parseInt(process.env.CIRCUIT_BREAKER_WINDOW_SIZE) || 20,                 // 20 requests
+    CIRCUIT_BREAKER_TIMEOUT: parseInt(process.env.CIRCUIT_BREAKER_TIMEOUT) || 30000,                      // 30 seconds
+    CIRCUIT_BREAKER_SUCCESS_THRESHOLD: parseInt(process.env.CIRCUIT_BREAKER_SUCCESS_THRESHOLD) || 2,      // 2 successes
 }
