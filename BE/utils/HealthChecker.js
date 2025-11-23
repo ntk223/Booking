@@ -3,10 +3,6 @@
  * 
  * Provides comprehensive health checks for all system dependencies.
  * Supports shallow (quick) and deep (thorough) health checks.
- * 
- * @example
- * const health = await healthChecker.checkAll();
- * // Returns: { status: 'healthy', dependencies: {...}, timestamp: ... }
  */
 
 import sequelize from '../config/database.js';

@@ -8,18 +8,6 @@
  * - CLOSED: Normal operation, requests pass through
  * - OPEN: Failing fast, requests rejected immediately
  * - HALF_OPEN: Testing recovery, limited requests allowed
- * 
- * @example
- * const breaker = new CircuitBreaker('redis', {
- *   failureThreshold: 0.5,  // 50% error rate
- *   windowSize: 20,          // Over last 20 requests
- *   timeout: 30000,          // 30s before retry
- *   successThreshold: 2      // 2 successes to close
- * });
- * 
- * const result = await breaker.execute(async () => {
- *   return await redisClient.get('key');
- * });
  */
 
 import { EventEmitter } from 'events';
