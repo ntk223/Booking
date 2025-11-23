@@ -14,11 +14,9 @@ class RoomRepository {
         return { roomCreated, currentPage };
     }
 
-async getRoomDetails(roomId = null, pageNumber = 1) {
-    console.log(pageNumber);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  const limit = PAGE_SIZE;
-  const offset = (pageNumber - 1) * PAGE_SIZE;
+async getRoomDetails(roomId = null, pageNumber) {
+    // await new Promise(resolve => setTimeout(resolve, 1000));
+
 
   const query = {
     attributes: ['id', 'name', 'location', 'capacity', 'imageUrl', 'price'],
@@ -40,9 +38,9 @@ async getRoomDetails(roomId = null, pageNumber = 1) {
     if (roomId) { 
         query.where = { id: roomId };
     }
-    else {
-        query.limit = limit;
-        query.offset = offset;
+    else if (pageNumber) {
+        query.limit = PAGE_SIZE;
+        query.offset = (pageNumber - 1) * PAGE_SIZE;
     }
     
   const rooms = await Room.findAll(query);

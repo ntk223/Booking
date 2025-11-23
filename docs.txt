@@ -4,7 +4,8 @@ write query -> require more time
 rm -rf report result.jtl && mkdir report && jmeter -n -t test.jmx -l result.jtl -e -o report
 
 
-timeresponse ~ 700ms ( mean ) ( 200 user - 5s - 3 loop )
+before timeresponse ~ 700ms ( mean ) ( 200 user - 5s - 3 loop ) getAllRooms
+after -> using redis cache and pagination
 
 run docker redis
 docker-compose -f cache-compose.yml up -d

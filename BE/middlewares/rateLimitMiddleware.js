@@ -1,26 +1,32 @@
-// Token bucket config
+const rateLimitMap = new Map(); // key = client IP
 
-const RATE = 500 // req per second
-const BURST = 5000 // max tokens
-let tokens = BURST
+function rateLimit({ capacity = 10, refillRate = 1 }) {
+  // refillRate: token/second
+  return (req, res, next) => {
+    const key = req.ip; // hoặc req.headers['authorization'] nếu theo token
+    const now = Date.now();
 
-let last = Date.now()
-
-function rateLimitMiddleware(req, res, next) {
-    const now = Date.now()
-    const delta = (now - last) / 1000
-    tokens += delta * RATE
-    if (tokens > BURST) {
-        tokens = BURST
+    if (!rateLimitMap.has(key)) {
+      rateLimitMap.set(key, {
+        tokens: capacity - 1,
+        lastRefill: now,
+      });
+      return next();
     }
-    last = now
 
-    if (tokens >= 1) {
-        tokens -= 1
-        next()
+    const bucket = rateLimitMap.get(key);
+    // refill token
+    const elapsed = (now - bucket.lastRefill) / 1000; // seconds
+    bucket.tokens = Math.min(capacity, bucket.tokens + elapsed * refillRate);
+    bucket.lastRefill = now;
+
+    if (bucket.tokens >= 1) {
+      bucket.tokens -= 1;
+      return next();
     } else {
-        res.status(429).json({ message: 'Too many requests, please try again later.' })
+      res.status(429).json({ message: "Too Many Requests" });
     }
+  };
 }
 
-export default rateLimitMiddleware
+export default rateLimit;
