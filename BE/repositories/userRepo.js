@@ -1,5 +1,7 @@
 import {User} from "../models/Model.js";
-
+import { generateToken } from "../utils/jwt.js";
+import { StatusCodes } from "http-status-codes";
+import ApiError from "../utils/ApiError.js";
 class UserRepository {
     async createUser(userData) {
         const emailExists = await User.findOne({ where: { email: userData.email } });
@@ -28,14 +30,16 @@ class UserRepository {
 
         const user = await User.findOne({ where: { email: email } });
         if (!user) {
-            throw new Error("User not found.");
+            throw new ApiError(StatusCodes.NOT_FOUND, "User not found.");
         }
 
         const isPasswordValid = user.password === password; // In real applications, use hashed passwords
         if (!isPasswordValid) {
-            throw new Error("Invalid password.");
+            // console.log(StatusCodes.UNAUTHORIZED);
+            throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid password.");
         }
-        return user;
+        const token = generateToken({ id: user.id, email: user.email, role: user.role });
+        return { user, token };
     }
 }
 

@@ -18,7 +18,8 @@ const Login = () => {
       console.log(res.data.message);
 
       // Lưu thông tin người dùng vào sessionStorage
-      sessionStorage.setItem("user", JSON.stringify(res.data));
+      sessionStorage.setItem("user", JSON.stringify(res.data.user));
+      sessionStorage.setItem("token", JSON.stringify(res.data.token));
       console.log(res.data);
 
       // Kiểm tra role và điều hướng
