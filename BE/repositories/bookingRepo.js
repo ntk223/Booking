@@ -42,32 +42,12 @@ class BookingRepository {
                     status: {
                         [Op.ne]: 'cancelled'
                     },
-                    [Op.or]: [
-                        {
-                            startTime: {
-                                [Op.between]: [bookingData.startTime, bookingData.endTime],
-                            },
-                        },
-                        {
-                            endTime: {
-                                [Op.between]: [bookingData.startTime, bookingData.endTime],
-                            },
-                        },
-                        {
-                            [Op.and]: [
-                                {
-                                    startTime: {
-                                        [Op.lte]: bookingData.startTime,
-                                    },
-                                },
-                                {
-                                    endTime: {
-                                        [Op.gte]: bookingData.endTime,
-                                    },
-                                },
-                            ],
-                        },
-                    ],
+                    [Op.not]: {
+                        [Op.or]: [
+                            { endTime: { [Op.lte]: bookingData.startTime } },  // cũ kết thúc trước hoặc đúng lúc mới bắt đầu → không trùng
+                            { startTime: { [Op.gte]: bookingData.endTime } },  // cũ bắt đầu sau hoặc đúng lúc mới kết thúc → không trùng
+                        ]
+                    }
                 },
                 lock: t.LOCK.UPDATE,
                 transaction: t

@@ -9,3 +9,8 @@ after -> using redis cache and pagination
 
 run docker redis
 docker-compose -f cache-compose.yml up -d
+
+
+cau hinh ratelimter cho auth route va room route != nhau
+auth route check ip
+room route check token session

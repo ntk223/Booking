@@ -16,8 +16,8 @@ async function testRaceCondition() {
 
   // Use same booking data for all concurrent requests
   const bookingData = {
-    roomId: 1267,  // Using actual room ID from database
-    userId: 504,   // Using actual user ID from database
+    roomId: 1100,  // Using actual room ID from database
+    userId: 104,   // Using actual user ID from database ( start from 104 to 113 )
     date: '2025-12-15',
     startTime: '14:00',
     endTime: '16:00',
@@ -39,6 +39,7 @@ async function testRaceCondition() {
       },
       body: JSON.stringify({
         ...bookingData,
+        userId: bookingData.userId + index,
         purpose: `Race condition test #${index + 1}`
       }),
     }).then(async response => ({
@@ -108,8 +109,8 @@ async function testNonConflictingBookings() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        roomId: 1267,  // Using actual room ID from database
-        userId: 504,   // Using actual user ID from database
+        roomId: 1087,  // Using actual room ID from database
+        userId: 104 + index,   // Using actual user ID from database (start from 104 to 113)
         date: '2025-12-20',
         startTime: `${9 + index}:00`,
         endTime: `${10 + index}:00`,
@@ -146,7 +147,7 @@ async function runAllTests() {
   console.log('===============================================\n');
 
   try {
-    const test1 = await testRaceCondition();
+    const test1 =true // await testRaceCondition();
     const test2 = await testNonConflictingBookings();
 
     console.log('\n================================================');

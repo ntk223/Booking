@@ -38,17 +38,17 @@ class UserController {
         }
     }
 
-    async login(req, res) {
+    async login(req, res, next) {
         try {
             const { email, password } = req.body;
-            const user = await userService.login(email, password);
+            const {user, token} = await userService.login(email, password);
             if (user) {
-                res.status(StatusCodes.OK).json({ message: "Login successful", user });
+                res.status(StatusCodes.OK).json({user, token });
             } else {
                 res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid email or password" });
             }
         } catch (error) {
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error", error: error.message });
+            next(error);
         }
     }
 

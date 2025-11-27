@@ -12,7 +12,7 @@ class RoomService {
     async getAllRooms(pageNumber) {
         const cachedRooms = await safeRedisClient.get('room:page:' + pageNumber);
         if (cachedRooms) {
-            console.log("Cache hit for rooms page " + pageNumber);
+            // console.log("Cache hit for rooms page " + pageNumber);
             return JSON.parse(cachedRooms);
         }
         // console.log("Cache miss for rooms page " + pageNumber);
@@ -26,14 +26,14 @@ class RoomService {
         for (let page = currentPage; page <= totalPages; page++) {
             await safeRedisClient.del('room:page:' + page);
         }
-        console.log('room:page:' + currentPage + ' to room:page:' + totalPages + ' deleted from cache');
+        // console.log('room:page:' + currentPage + ' to room:page:' + totalPages + ' deleted from cache');
         await safeRedisClient.del('room:' + roomId);
         return true;
     }
     async updateRoom(roomId, updatedData) {
         const { room, currentPage } = await roomRepo.updateRoom(roomId, updatedData);
         await safeRedisClient.del('room:page:' + currentPage);
-        console.log(currentPage, 'aaaaa');
+        // console.log(currentPage, 'aaaaa');
         await safeRedisClient.del(`room:${roomId}`);
         return room;
     }

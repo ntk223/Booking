@@ -13,7 +13,8 @@
     "benchmark:race": "node benchmark/race-condition-test.js",
     "benchmark:k6": "k6 run benchmark/load-test.js",
     "benchmark:artillery": "artillery run benchmark/load-test.yml",
-    "analyze": "node benchmark/analyze-bottlenecks.js"
+    "analyze": "node benchmark/analyze-bottlenecks.js",
+    "ratelimit": "k6 run benchmark/rate-limit-test.js"
   },
   "keywords": [],
   "author": "",
