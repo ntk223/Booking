@@ -1,5 +1,6 @@
 import { bookingService } from "../services/bookingService.js";
 import { StatusCodes } from "http-status-codes";
+
 class BookingController {
     async createBooking(req, res) {
         try {
@@ -8,7 +9,7 @@ class BookingController {
             res.status(StatusCodes.CREATED).json(newBooking);
         } catch (error) {
             // Handle specific error types
-            if (error.message.includes("already booked") || 
+            if (error.message.includes("already booked") ||
                 error.message.includes("Another booking is in progress") ||
                 error.message.includes("Missing required fields") ||
                 error.message.includes("End time must be after start time")) {
@@ -56,6 +57,16 @@ class BookingController {
             const { status } = req.body;
             await bookingService.updateBookingStatus(bookingId, status);
             res.status(StatusCodes.OK).send();
+        } catch (error) {
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        }
+    }
+
+    async getBookingsByUser(req, res) {
+        try {
+            const userId = req.params.userId;
+            const bookings = await bookingService.getBookingsByUser(userId);
+            res.status(StatusCodes.OK).json(bookings);
         } catch (error) {
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
         }

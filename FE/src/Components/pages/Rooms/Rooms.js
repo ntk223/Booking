@@ -17,7 +17,7 @@ const RoomsList = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/room?page=${pageNumber}`);
+        const res = await axios.get(`http://localhost:5000/api/rooms?page=${pageNumber}`);
         setRooms(res.data.rooms);
         setPageNumber(res.data.currentPage);
         setTotalPages(res.data.totalPages);
@@ -91,7 +91,7 @@ const RoomsList = () => {
             </Col>
           ))}
         </Row>
-        
+
         <div style={{ textAlign: "center", marginTop: "24px" }}>
           <Pagination
             current={pageNumber}
@@ -104,7 +104,7 @@ const RoomsList = () => {
             }}
             showSizeChanger={false}
             showQuickJumper
-            showTotal={(total, range) => 
+            showTotal={(total, range) =>
               `${range[0]}-${range[1]} của ${total} phòng`
             }
           />

@@ -9,6 +9,7 @@ export class RoomController {
             res.status(StatusCodes.CREATED).json(newRoom);
         } catch (error) {
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+            console.error("Error creating room:", error); // Debug logging
         }
     }
 

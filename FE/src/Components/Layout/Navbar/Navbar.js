@@ -50,7 +50,7 @@ function Navbar() {
               <Link to="/bookinghistory" className="navLink">
                 Lịch sử đặt phòng{" "}
               </Link>
-              <span className="navUser">Xin chào, {user.user.email}</span>
+              <span className="navUser">Xin chào, {user.name}</span>
               <button className="logoutBtn" onClick={handleLogout}>
                 Logout
               </button>

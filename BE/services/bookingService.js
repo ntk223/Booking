@@ -20,6 +20,10 @@ class BookingService {
     async getBookingDetails(bookingId) {
         return await bookingRepo.getBookingDetails(bookingId);
     }
+
+    async getBookingsByUser(userId) {
+        return await bookingRepo.getBookingsByUserId(userId);
+    }
 }
 
 export const bookingService = new BookingService();

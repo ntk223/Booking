@@ -170,7 +170,7 @@ function AdminUser() {
             {/* Modal for Adding/Editing User */}
             <Modal
               title={isEdit ? "Edit User" : "Add User"}
-              visible={isModalVisible}
+              open={isModalVisible}
               onCancel={handleCancel}
               footer={null}
             >

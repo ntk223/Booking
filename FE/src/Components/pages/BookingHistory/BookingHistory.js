@@ -16,14 +16,14 @@ const BookingHistory = () => {
 
   // Lấy userId từ sessionStorage
   const user = sessionStorage.getItem("user");
-  const userId = user ? JSON.parse(user).user.id : null;
+  const userId = user ? JSON.parse(user).id : null;
 
   // Fetch bookings data của user
   useEffect(() => {
     const fetchUserBookings = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/bookings-user?userId=${userId}`
+          `http://localhost:5000/api/bookings/user/${userId}`
         );
         console.log(response.data); // In ra dữ liệu để kiểm tra
         setBookings(response.data);
@@ -122,8 +122,8 @@ const BookingHistory = () => {
             status === "confirmed"
               ? "green"
               : status === "pending"
-              ? "gold"
-              : "red"
+                ? "gold"
+                : "red"
           }
         >
           {getStatusText(status)}

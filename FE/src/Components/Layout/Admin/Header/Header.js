@@ -5,7 +5,7 @@ import "./Header.css";
 
 function Header() {
   const user = sessionStorage.getItem("user");
-  const username = user ? JSON.parse(user).user.name : null;
+  const username = user ? JSON.parse(user).name : null;
   return (
     <header className="header">
       <div className="header__left">
