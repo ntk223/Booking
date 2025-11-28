@@ -14,22 +14,6 @@ class GCPService {
     }
 
     /**
-import { Storage } from "@google-cloud/storage";
-import dotenv from "dotenv";
-import path from "path";
-
-dotenv.config();
-
-class GCPService {
-    constructor() {
-        this.storage = new Storage({
-            projectId: process.env.GCP_PROJECT_ID,
-            keyFilename: path.resolve(process.env.GCP_KEY_FILE_PATH),
-        });
-        this.bucketName = process.env.GCP_BUCKET_NAME;
-    }
-
-    /**
      * Generate a V4 Signed URL for uploading a file to GCS.
      * @param {string} filename - The name of the file to be uploaded.
      * @param {string} contentType - The MIME type of the file.

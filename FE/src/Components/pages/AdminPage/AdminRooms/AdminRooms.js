@@ -52,6 +52,7 @@ const AdminRooms = () => {
   }, [currentPage]);
 
   const handleAddRoom = async (values) => {
+    console.log("Adding room with values:", values);
     try {
       const token = JSON.parse(sessionStorage.getItem("token"));
       const response = await axios.post(API_URL, {
@@ -73,6 +74,7 @@ const AdminRooms = () => {
   };
 
   const handleUpdate = async (values) => {
+    console.log("Updating room with values:", values);
     try {
       const token = JSON.parse(sessionStorage.getItem("token"));
       const response = await axios.put(`${API_URL}/${selectedRoom.id}`, {
@@ -115,18 +117,22 @@ const AdminRooms = () => {
 
   const handleUpload = async (file) => {
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const token = JSON.parse(sessionStorage.getItem("token"));
-      const { data } = await axios.post(`${STORAGE_API_URL}/upload`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
+      const { data } = await axios.get(`${STORAGE_API_URL}/upload-url`, {
+        params: {
+          filename: file.name,
+          contentType: file.type,
         },
       });
 
-      return data.publicUrl;
+      const { url, publicUrl } = data;
+
+      await axios.put(url, file, {
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      return publicUrl;
     } catch (error) {
       console.error("Upload error:", error);
       message.error("Upload failed");

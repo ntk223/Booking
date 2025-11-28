@@ -23,7 +23,7 @@ const RoomDetails = () => {
   useEffect(() => {
     // Lấy thông tin phòng
     axios
-      .get(`http://localhost:5000/api/room/${id}`)
+      .get(`http://localhost:5000/api/rooms/${id}`)
       .then((response) => {
         console.log(response);
         if (response.data.rooms && response.data.rooms.length > 0) {
