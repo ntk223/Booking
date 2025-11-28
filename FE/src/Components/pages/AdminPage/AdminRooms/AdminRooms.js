@@ -4,9 +4,11 @@ import Sidebar from "../../../Layout/Admin/Sidebar/Sidebar";
 import Header from "../../../Layout/Admin/Header/Header";
 import axios from "axios";
 import "./AdminRooms.css";
-import { AiFillDelete } from "react-icons/ai";
+import { AiFillDelete, AiOutlineUpload } from "react-icons/ai";
+import { Upload } from "antd";
 
 const API_URL = "http://localhost:5000/api/room";
+const STORAGE_API_URL = "http://localhost:5000/api/storage";
 // const DISTRICT_API_URL = "http://localhost:5000/api/districts";
 
 const AdminRooms = () => {
@@ -19,6 +21,7 @@ const AdminRooms = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm(); // Khởi tạo form instance
+  const [addForm] = Form.useForm();
 
   const fetchRooms = async (page = currentPage) => {
     setLoading(true);
@@ -67,6 +70,7 @@ const AdminRooms = () => {
       });
       message.success("Thêm phòng thành công!");
       setIsAddModalVisible(false);
+      addForm.resetFields();
       fetchRooms(1); // Reset to first page after adding
     } catch (error) {
       message.error("Lỗi khi thêm phòng.");
@@ -77,7 +81,7 @@ const AdminRooms = () => {
     try {
       const response = await axios.put(`${API_URL}/${selectedRoom.id}`, {
         ...values,
-        // district_id: values.districtId,
+        district_id: values.districtId,
       });
       setRooms(
         rooms.map((room) =>
@@ -100,6 +104,31 @@ const AdminRooms = () => {
       fetchRooms(currentPage);
     } catch (error) {
       message.error("Lỗi khi xóa phòng.");
+    }
+  };
+
+  const handleUpload = async (file) => {
+    try {
+      const { data } = await axios.get(`${STORAGE_API_URL}/upload-url`, {
+        params: {
+          filename: file.name,
+          contentType: file.type,
+        },
+      });
+
+      const { url, publicUrl } = data;
+
+      await axios.put(url, file, {
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Upload error:", error);
+      message.error("Upload failed");
+      throw error;
     }
   };
 
@@ -162,9 +191,9 @@ const AdminRooms = () => {
           >
             Thêm phòng
           </Button>
-          <Table 
-            dataSource={rooms} 
-            columns={columns} 
+          <Table
+            dataSource={rooms}
+            columns={columns}
             rowKey="id"
             loading={loading}
             pagination={{
@@ -179,11 +208,11 @@ const AdminRooms = () => {
               },
               showSizeChanger: false,
               showQuickJumper: true,
-              showTotal: (total, range) => 
+              showTotal: (total, range) =>
                 `${range[0]}-${range[1]} của ${total} phòng`
             }}
           />
-        
+
 
           {/* Modal cập nhật phòng */}
           <Modal
@@ -213,11 +242,11 @@ const AdminRooms = () => {
                   <Input />
                 </Form.Item>
                 <Form.Item
-                  name="district"
+                  name="districtId"
                   label="Quận"
                   rules={[{ required: true }]}
                 >
-                  <Select defaultValue={selectedRoom.district}>
+                  <Select>
                     {districts.map((district) => (
                       <Select.Option key={district.id} value={district.id}>
                         {district.name}
@@ -231,8 +260,30 @@ const AdminRooms = () => {
                 <Form.Item name="price" label="Giá">
                   <Input type="number" />
                 </Form.Item>
-                <Form.Item name="imageUrl" label="URL hình ảnh">
+                <Form.Item label="Hình ảnh">
+                  <Upload
+                    customRequest={async ({ file, onSuccess, onError }) => {
+                      try {
+                        const publicUrl = await handleUpload(file);
+                        form.setFieldsValue({ imageUrl: publicUrl });
+                        onSuccess("Ok");
+                      } catch (e) {
+                        onError(e);
+                      }
+                    }}
+                    showUploadList={false}
+                  >
+                    <Button icon={<AiOutlineUpload />}>Upload Image</Button>
+                  </Upload>
+                </Form.Item>
+                <Form.Item name="imageUrl" label="URL hình ảnh" hidden>
                   <Input />
+                </Form.Item>
+                <Form.Item shouldUpdate={(prev, curr) => prev.imageUrl !== curr.imageUrl}>
+                  {({ getFieldValue }) => {
+                    const imageUrl = getFieldValue('imageUrl');
+                    return imageUrl ? <img src={imageUrl} alt="Room" style={{ width: '100px', marginTop: '10px' }} /> : null;
+                  }}
                 </Form.Item>
                 <Form.Item>
                   <Button type="primary" htmlType="submit">
@@ -253,10 +304,13 @@ const AdminRooms = () => {
           <Modal
             title="Thêm phòng mới"
             visible={isAddModalVisible}
-            onCancel={() => setIsAddModalVisible(false)}
+            onCancel={() => {
+              setIsAddModalVisible(false);
+              addForm.resetFields();
+            }}
             footer={null}
           >
-            <Form layout="vertical" onFinish={handleAddRoom}>
+            <Form layout="vertical" onFinish={handleAddRoom} form={addForm}>
               <Form.Item
                 name="name"
                 label="Tên phòng"
@@ -286,8 +340,30 @@ const AdminRooms = () => {
               <Form.Item name="price" label="Giá">
                 <Input type="number" />
               </Form.Item>
-              <Form.Item name="imageUrl" label="URL hình ảnh">
+              <Form.Item label="Hình ảnh">
+                <Upload
+                  customRequest={async ({ file, onSuccess, onError }) => {
+                    try {
+                      const publicUrl = await handleUpload(file);
+                      addForm.setFieldsValue({ imageUrl: publicUrl });
+                      onSuccess("Ok");
+                    } catch (e) {
+                      onError(e);
+                    }
+                  }}
+                  showUploadList={false}
+                >
+                  <Button icon={<AiOutlineUpload />}>Upload Image</Button>
+                </Upload>
+              </Form.Item>
+              <Form.Item name="imageUrl" label="URL hình ảnh" hidden>
                 <Input />
+              </Form.Item>
+              <Form.Item shouldUpdate={(prev, curr) => prev.imageUrl !== curr.imageUrl}>
+                {({ getFieldValue }) => {
+                  const imageUrl = getFieldValue('imageUrl');
+                  return imageUrl ? <img src={imageUrl} alt="Room" style={{ width: '100px', marginTop: '10px' }} /> : null;
+                }}
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit">

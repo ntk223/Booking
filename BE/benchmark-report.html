@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 5px solid #3498db;
+        }
+
+        .card h3 {
+            margin: 0;
+            font-size: 2em;
+            color: #2c3e50;
+        }
+
+        .card p {
+            margin: 5px 0 0;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 40px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Benchmark Report</h1>
+        <p style="text-align: center;">Generated on: <span id="timestamp"></span></p>
+
+        <div class="metrics-grid">
+            <div class="card" style="border-color: #2ecc71;">
+                <h3 id="valet-count">-</h3>
+                <p>Valet Key Uploads</p>
+            </div>
+            <div class="card" style="border-color: #e74c3c;">
+                <h3 id="proxy-count">-</h3>
+                <p>Proxy Uploads</p>
+            </div>
+            <div class="card" style="border-color: #f1c40f;">
+                <h3 id="total-reqs">-</h3>
+                <p>Total Requests</p>
+            </div>
+            <div class="card" style="border-color: #9b59b6;">
+                <h3 id="avg-latency">-</h3>
+                <p>Avg Latency (ms)</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="mainChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Data injected by the runner script
+        const benchmarkData = {
+    "root_group": {
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "valet: get url status is 200": {
+                    "fails": 0,
+                    "name": "valet: get url status is 200",
+                    "path": "::valet: get url status is 200",
+                    "id": "898c50d0e929be5fce1c865ad8a3c89a",
+                    "passes": 78
+                },
+                "valet: upload status is 200": {
+                    "path": "::valet: upload status is 200",
+                    "id": "80e2fd3dd1dfe7e48de71f35ec9a5126",
+                    "passes": 78,
+                    "fails": 0,
+                    "name": "valet: upload status is 200"
+                },
+                "proxy: status is 200": {
+                    "name": "proxy: status is 200",
+                    "path": "::proxy: status is 200",
+                    "id": "05f60237d9828c1eafab10ca6b1f7cd2",
+                    "passes": 73,
+                    "fails": 0
+                }
+            },
+        "name": "",
+        "path": ""
+    },
+    "metrics": {
+        "data_sent": {
+            "count": 793137701,
+            "rate": 11220296.749769503
+        },
+        "http_req_duration": {
+            "avg": 6041.321536681224,
+            "min": 1.1993,
+            "med": 8294.4365,
+            "max": 12246.4943,
+            "p(90)": 10483.09554,
+            "p(95)": 11028.93746
+        },
+        "http_req_duration{expected_response:true}": {
+            "max": 12246.4943,
+            "p(90)": 10483.09554,
+            "p(95)": 11028.93746,
+            "avg": 6041.321536681224,
+            "min": 1.1993,
+            "med": 8294.4365
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 229,
+            "value": 0
+        },
+        "http_req_tls_handshaking": {
+            "p(95)": 70.79511999999998,
+            "avg": 6.172398253275108,
+            "min": 0,
+            "med": 0,
+            "max": 83.9584,
+            "p(90)": 0
+        },
+        "iteration_duration": {
+            "avg": 9182.329462913913,
+            "min": 5003.7874,
+            "med": 9397.3234,
+            "max": 12263.6177,
+            "p(90)": 10784.6841,
+            "p(95)": 11526.0944
+        },
+        "checks": {
+            "passes": 229,
+            "fails": 0,
+            "value": 1
+        },
+        "data_received": {
+            "rate": 4580.665402873234,
+            "count": 323797
+        },
+        "http_req_sending": {
+            "p(95)": 9700.1844,
+            "avg": 2974.8951934497813,
+            "min": 0,
+            "med": 18.3316,
+            "max": 10935.8239,
+            "p(90)": 9325.37274
+        },
+        "vus_max": {
+            "value": 40,
+            "min": 40,
+            "max": 40
+        },
+        "http_req_blocked": {
+            "p(90)": 3.0160000000000005,
+            "p(95)": 106.01239999999999,
+            "avg": 9.830765938864628,
+            "min": 0,
+            "med": 0,
+            "max": 119.9806
+        },
+        "iterations": {
+            "count": 151,
+            "rate": 2.1361546766457327
+        },
+        "http_req_connecting": {
+            "min": 0,
+            "med": 0,
+            "max": 41.564,
+            "p(90)": 2.6189,
+            "p(95)": 34.972319999999996,
+            "avg": 3.472299563318775
+        },
+        "vus": {
+            "value": 6,
+            "min": 6,
+            "max": 31
+        },
+        "http_req_waiting": {
+            "avg": 3064.7176820960717,
+            "min": 1.0667,
+            "med": 546.9754,
+            "max": 11671.1815,
+            "p(90)": 9969.65766,
+            "p(95)": 10481.50624
+        },
+        "http_req_receiving": {
+            "avg": 1.7086611353711794,
+            "min": 0,
+            "med": 0.6851,
+            "max": 8.0757,
+            "p(90)": 4.25474,
+            "p(95)": 4.715999999999999
+        },
+        "http_reqs": {
+            "count": 229,
+            "rate": 3.2395988142508134
+        }
+    }
+};
+
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+
+        function processData(data) {
+            const checks = data.root_group.checks;
+            const valetPasses = checks['valet: upload status is 200']?.passes || 0;
+            const proxyPasses = checks['proxy: status is 200']?.passes || 0;
+
+            const metrics = data.metrics;
+            const totalReqs = metrics.http_reqs.count;
+            const avgLatency = metrics.http_req_duration.avg.toFixed(2);
+
+            // Update Cards
+            document.getElementById('valet-count').textContent = valetPasses;
+            document.getElementById('proxy-count').textContent = proxyPasses;
+            document.getElementById('total-reqs').textContent = totalReqs;
+            document.getElementById('avg-latency').textContent = avgLatency;
+
+            // Render Chart
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Valet Key', 'Proxy Upload'],
+                    datasets: [{
+                        label: 'Successful Uploads',
+                        data: [valetPasses, proxyPasses],
+                        backgroundColor: ['rgba(46, 204, 113, 0.7)', 'rgba(231, 76, 60, 0.7)'],
+                        borderColor: ['rgba(46, 204, 113, 1)', 'rgba(231, 76, 60, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Upload Performance Comparison' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+                    }
+                }
+            });
+        }
+
+        if (benchmarkData) {
+            processData(benchmarkData);
+        } else {
+            alert('No benchmark data found!');
+        }
+    </script>
+</body>
+
+</html>
