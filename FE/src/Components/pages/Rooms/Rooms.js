@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom"; // ✅ Thêm dòng này
 import Navbar from "../../Layout/Navbar/Navbar";
 import Footer from "../../Layout/Footer/Footer";
+import api from "../../../api/api";
 
 const { Meta } = Card;
 
@@ -17,7 +18,7 @@ const RoomsList = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/room?page=${pageNumber}`);
+        const res = await api.get(`/room?page=${pageNumber}`);
         setRooms(res.data.rooms);
         setPageNumber(res.data.currentPage);
         setTotalPages(res.data.totalPages);
