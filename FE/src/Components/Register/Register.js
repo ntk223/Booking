@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Register.css";
-
+import api from "../../api/api";
 const Register = () => {
   const navigate = useNavigate();
 
@@ -38,7 +37,7 @@ const Register = () => {
 
     try {
       // Gửi yêu cầu đăng kí tới API
-      const res = await axios.post("http://localhost:5000/api/register", {
+      const res = await api.post("/register", {
         name,
         phone_number,
         email,

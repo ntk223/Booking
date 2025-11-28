@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Descriptions, Image, Tag } from "antd";
-import axios from "axios";
-
+import api from "../../../../api/api";
 const RoomDetails = ({ room }) => {
   const [districtName, setDistrictName] = useState(null);
   const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
@@ -10,7 +9,7 @@ const RoomDetails = ({ room }) => {
   // Hàm lấy tất cả các quận từ API
   const fetchDistricts = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/districts");
+      const response = await api.get("/districts");
       setDistricts(response.data); // Lưu tất cả các quận vào state
     } catch (error) {
       console.error("Error fetching districts:", error);

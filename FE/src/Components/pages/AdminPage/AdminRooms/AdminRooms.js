@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Table, Button, Form, Input, Modal, Tag, Select, message, Pagination } from "antd";
 import Sidebar from "../../../Layout/Admin/Sidebar/Sidebar";
 import Header from "../../../Layout/Admin/Header/Header";
-import axios from "axios";
+import api from "../../../../api/api";
 import "./AdminRooms.css";
 import { AiFillDelete, AiOutlineUpload } from "react-icons/ai";
 import { Upload } from "antd";
 
-const API_URL = "http://localhost:5000/api/room";
-const STORAGE_API_URL = "http://localhost:5000/api/storage";
+const API_URL = "/room";
+const STORAGE_API_URL = "/storage";
 // const DISTRICT_API_URL = "http://localhost:5000/api/districts";
 
 const AdminRooms = () => {
@@ -26,7 +26,7 @@ const AdminRooms = () => {
   const fetchRooms = async (page = currentPage) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}?page=${page}`);
+      const response = await api.get(`${API_URL}?page=${page}`);
       setRooms(response.data.rooms);
       setCurrentPage(response.data.currentPage);
       setTotalPages(response.data.totalPages);
@@ -64,7 +64,7 @@ const AdminRooms = () => {
 
   const handleAddRoom = async (values) => {
     try {
-      const response = await axios.post(API_URL, {
+      const response = await api.post(API_URL, {
         ...values,
         district_id: values.districtId,
       });
@@ -79,7 +79,7 @@ const AdminRooms = () => {
 
   const handleUpdate = async (values) => {
     try {
-      const response = await axios.put(`${API_URL}/${selectedRoom.id}`, {
+      const response = await api.put(`${API_URL}/${selectedRoom.id}`, {
         ...values,
         district_id: values.districtId,
       });
@@ -99,7 +99,7 @@ const AdminRooms = () => {
 
   const handleDeleteRoom = async (id) => {
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await api.delete(`${API_URL}/${id}`);
       message.success("Xóa phòng thành công!");
       fetchRooms(currentPage);
     } catch (error) {
@@ -109,7 +109,7 @@ const AdminRooms = () => {
 
   const handleUpload = async (file) => {
     try {
-      const { data } = await axios.get(`${STORAGE_API_URL}/upload-url`, {
+      const { data } = await api.get(`${STORAGE_API_URL}/upload-url`, {
         params: {
           filename: file.name,
           contentType: file.type,
@@ -118,7 +118,7 @@ const AdminRooms = () => {
 
       const { url, publicUrl } = data;
 
-      await axios.put(url, file, {
+      await api.put(url, file, {
         headers: {
           "Content-Type": file.type,
         },
