@@ -1,45 +1,57 @@
-import redis from 'redis';
-import {env} from './environment.js';
-import { CircuitBreaker } from '../utils/CircuitBreaker.js';
+import redis from "redis";
+import { env } from "./environment.js";
+import { CircuitBreaker } from "../utils/CircuitBreaker.js";
+import logger from "../logger/winston.log.js";
 
 const redisClient = redis.createClient({
   url: `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`,
   socket: {
     reconnectStrategy: (retries) => {
       if (retries > 10) {
-        console.error('[ERROR] Redis max retries exceeded');
-        return new Error('Redis max retries exceeded');
+        logger.error("Redis max retries exceeded", {
+          utilService: "REDIS",
+        });
+        return new Error("Redis max retries exceeded");
       }
       return Math.min(retries * 50, 500);
-    }
-  }
+    },
+  },
 });
 
-redisClient.on('error', (err) => {
-  console.error('[ERROR] Redis error:', err.message);
+redisClient.on("error", (err) => {
+  logger.error(`Redis error: ${err.message}`, {
+    utilService: "REDIS",
+  });
 });
 
-redisClient.on('connect', () => {
-  console.log('[INFO] Connecting to Redis...');
+redisClient.on("connect", () => {
+  logger.info("Connecting to Redis...", {
+    utilService: "REDIS",
+  });
 });
 
-redisClient.on('ready', () => {
-  console.log('[INFO] Redis client ready');
-  console.log(`   Host: ${env.REDIS_HOST}:${env.REDIS_PORT}\n`);
+redisClient.on("ready", () => {
+  logger.info(`Redis client ready. Host: ${env.REDIS_HOST}:${env.REDIS_PORT}`, {
+    utilService: "REDIS",
+  });
 });
 
 (async () => {
   try {
     await redisClient.connect();
   } catch (err) {
-    console.error('[ERROR] Redis connection failed:', err.message);
-    console.warn('[WARNING] Redis is not available. Caching will be disabled.');
+    logger.error(`Redis connection failed: ${err.message}`, {
+      utilService: "REDIS",
+    });
+    logger.warn(`Redis is not available. Caching will be disabled.`, {
+      utilService: "REDIS",
+    });
   }
 })();
 
 /**
  * SafeRedisClient - Wraps Redis operations with Circuit Breaker
- * 
+ *
  * Provides graceful degradation when Redis is unavailable.
  * - GET operations return null (cache miss)
  * - SET/DEL operations silently succeed (best-effort caching)
@@ -48,25 +60,35 @@ redisClient.on('ready', () => {
 class SafeRedisClient {
   constructor(client) {
     this.client = client;
-    
+
     // Create circuit breaker with configuration from environment
-    this.circuitBreaker = new CircuitBreaker('redis', {
+    this.circuitBreaker = new CircuitBreaker("redis", {
       failureThreshold: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || 0.5,
       windowSize: env.CIRCUIT_BREAKER_WINDOW_SIZE || 20,
       timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000,
       successThreshold: env.CIRCUIT_BREAKER_SUCCESS_THRESHOLD || 2,
-      minRequestCount: 5
+      minRequestCount: 5,
     });
 
     // Listen to circuit breaker events for logging
-    this.circuitBreaker.on('stateChanged', (event) => {
-      if (event.to === 'OPEN') {
-        console.error(
-          `[CIRCUIT_BREAKER] Redis circuit opened due to high failure rate ` +
-          `(${(event.failureRate * 100).toFixed(1)}%). Entering graceful degradation mode.`
+    this.circuitBreaker.on("stateChanged", (event) => {
+      if (event.to === "OPEN") {
+        logger.error(
+          `Redis circuit opened due to high failure rate ` +
+            `(${(event.failureRate * 100).toFixed(
+              1
+            )}%). Entering graceful degradation mode.`,
+          {
+            utilService: "CIRCUIT_BREAKER",
+          }
         );
-      } else if (event.to === 'CLOSED') {
-        console.log('[CIRCUIT_BREAKER] Redis circuit closed. Cache operations restored.');
+      } else if (event.to === "CLOSED") {
+        logger.info(
+          "Redis circuit closed. Cache operations restored.",
+          {
+            utilService: "CIRCUIT_BREAKER",
+          }
+        );
       }
     });
   }
@@ -86,7 +108,9 @@ class SafeRedisClient {
         return null;
       }
       // Log error but don't throw - treat as cache miss
-      console.warn(`[REDIS] GET failed for key "${key}": ${error.message}`);
+      logger.warn(`GET failed for key "${key}": ${error.message}`, {
+        utilService: "REDIS",
+      });
       return null;
     }
   }
@@ -106,7 +130,9 @@ class SafeRedisClient {
         return true;
       }
       // Log error but don't throw - best-effort caching
-      console.warn(`[REDIS] SET failed for key "${key}": ${error.message}`);
+      logger.warn(`SET failed for key "${key}": ${error.message}`, {
+        utilService: "REDIS",
+      });
       return false;
     }
   }
@@ -126,7 +152,9 @@ class SafeRedisClient {
         return true;
       }
       // Log error but don't throw - best-effort invalidation
-      console.warn(`[REDIS] DEL failed for key "${key}": ${error.message}`);
+      logger.warn(`DEL failed for key "${key}": ${error.message}`, {
+        utilService: "REDIS",
+      });
       return false;
     }
   }
