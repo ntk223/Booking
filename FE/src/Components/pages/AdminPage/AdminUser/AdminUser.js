@@ -2,7 +2,7 @@ import Sidebar from "../../../Layout/Admin/Sidebar/Sidebar";
 import Header from "../../../Layout/Admin/Header/Header";
 import { Button, Table, Modal, Form, Input, Select, notification } from "antd";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../../../api/api"; 
 import "./AdminUser.css";
 const { Option } = Select;
 
@@ -18,8 +18,8 @@ function AdminUser() {
   }, []);
 
   const fetchUsers = () => {
-    axios
-      .get("http://localhost:5000/api/users")
+    api
+      .get("/users")
       .then((response) => setUsers(response.data))
       .catch((error) =>
         console.error("There was an error fetching the users!", error)
@@ -38,8 +38,8 @@ function AdminUser() {
   };
 
   const handleDeleteUser = (id) => {
-    axios
-      .delete(`http://localhost:5000/api/users/${id}`)
+    api
+      .delete(`/users/${id}`)
       .then(() => {
         setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
         notification.success({ message: "User deleted successfully" });
@@ -63,8 +63,8 @@ function AdminUser() {
 
     if (isEdit) {
       // Cập nhật người dùng
-      axios
-        .put(`http://localhost:5000/api/users/${editingUser.id}, user`)
+      api
+        .put(`/users/${editingUser.id}`, user)
         .then(() => {
           // Cập nhật trực tiếp người dùng trong state
           setUsers((prevUsers) =>
@@ -84,8 +84,8 @@ function AdminUser() {
         );
     } else {
       // Thêm người dùng mới
-      axios
-        .post("http://localhost:5000/api/users", user)
+      api
+        .post("/users", user)
         .then((response) => {
           setUsers((prevUsers) => [...prevUsers, response.data]);
           notification.success({ message: "User added successfully" });
