@@ -249,6 +249,7 @@ class BookingController {
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: error.message });
     }
+    }
 
     async getBookingsByUser(req, res) {
         try {

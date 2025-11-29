@@ -18,7 +18,7 @@ const RoomsList = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const res = await api.get(`/room?page=${pageNumber}`);
+        const res = await api.get(`/rooms?page=${pageNumber}`);
         setRooms(res.data.rooms);
         setPageNumber(res.data.currentPage);
         setTotalPages(res.data.totalPages);

@@ -22,7 +22,7 @@ const RoomDetails = () => {
   useEffect(() => {
     // Lấy thông tin phòng
     api
-      .get(`/room/${id}`)
+      .get(`/rooms/${id}`)
       .then((response) => {
         console.log(response);
         if (response.data.rooms && response.data.rooms.length > 0) {
