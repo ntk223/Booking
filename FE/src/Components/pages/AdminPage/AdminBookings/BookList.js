@@ -12,6 +12,7 @@ import {
 } from "antd";
 import { Calendar, Clock, User } from "lucide-react";
 import axios from "axios"; // Import axios
+import api from "../../../../api/api";
 import dayjs from "dayjs";
 import RoomDetails from "./RoomDetails";
 import Sidebar from "../../../Layout/Admin/Sidebar/Sidebar";
@@ -24,8 +25,8 @@ const BookingList = () => {
   const onStatusChange = async (bookingId, newStatus) => {
     try {
       // Gửi yêu cầu PUT tới API để cập nhật trạng thái của booking
-      const response = await axios.put(
-        `http://localhost:5000/api/bookings/${bookingId}/status`,
+      const response = await api.put(
+        `/bookings/${bookingId}/status`,
         {
           status: newStatus,
         }

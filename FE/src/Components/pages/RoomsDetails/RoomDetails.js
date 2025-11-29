@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../Layout/Navbar/Navbar";
 import { Modal, Button, message,Spin } from "antd";
 import { format } from "date-fns"; // Import hàm format từ date-fns
 import { Phone, Users, MapPin, DollarSign } from "lucide-react";
 import "./RoomDetails.css";
-
+import api from "../../../api/api";
 const RoomDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -22,8 +21,8 @@ const RoomDetails = () => {
 
   useEffect(() => {
     // Lấy thông tin phòng
-    axios
-      .get(`http://localhost:5000/api/room/${id}`)
+    api
+      .get(`/room/${id}`)
       .then((response) => {
         console.log(response);
         setRoom(response.data[0]);
@@ -70,8 +69,8 @@ const RoomDetails = () => {
       };
 
       // Gửi yêu cầu POST để tạo booking
-      const bookingResponse = await axios.post(
-        "http://localhost:5000/api/booking",
+      const bookingResponse = await api.post(
+        "/booking",
         bookingData
       );
 

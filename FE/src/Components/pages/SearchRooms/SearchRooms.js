@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Navbar from "../../Layout/Navbar/Navbar";
 import { TimePicker } from "antd";
 import dayjs from "dayjs";
 import "./Room.css";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../Layout/Footer/Footer";
+import api from "../../../api/api";
 function SearchRooms() {
   const [filters, setFilters] = useState({
     date: "",
@@ -30,7 +30,7 @@ function SearchRooms() {
   // Lấy danh sách các quận từ backend
   const fetchDistricts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/districts");
+      const res = await api.get("/districts");
       setDistricts(res.data);
     } catch (err) {
       console.error("Không thể lấy danh sách quận", err.message);
@@ -95,7 +95,7 @@ function SearchRooms() {
     setLoading(true);
 
     try {
-      const response = await axios.get("http://localhost:5000/api/search", {
+      const response = await api.get("/search", {
         params: filters,
       });
       setRooms(response.data);

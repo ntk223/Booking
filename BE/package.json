@@ -14,7 +14,7 @@
     "benchmark:k6": "k6 run benchmark/load-test.js",
     "benchmark:artillery": "artillery run benchmark/load-test.yml",
     "analyze": "node benchmark/analyze-bottlenecks.js",
-    "ratelimit": "k6 run benchmark/rate-limit-test.js"
+    "ratelimit": "k6 run benchmark/rate-limit-test.js --summary-export benchmark/results/ratelimit-test-result.json"
   },
   "keywords": [],
   "author": "",
@@ -23,8 +23,8 @@
   "dependencies": {
     "@faker-js/faker": "^9.2.0",
     "@google-cloud/storage": "^7.17.3",
-    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-session": "^1.18.1",

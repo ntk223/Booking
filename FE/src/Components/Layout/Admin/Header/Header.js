@@ -1,11 +1,10 @@
 import React from "react";
-import { Button } from "antd";
 import { UserOutlined } from "@ant-design/icons"; // Import icon từ Ant Design
 import "./Header.css";
 
 function Header() {
   const user = sessionStorage.getItem("user");
-  const username = user ? JSON.parse(user).user.name : null;
+  const username = user.name
   return (
     <header className="header">
       <div className="header__left">
