@@ -37,7 +37,7 @@ const Register = () => {
 
     try {
       // Gửi yêu cầu đăng kí tới API
-      const res = await api.post("/register", {
+      const res = await api.post("/auth/register", {
         name,
         phone_number,
         email,

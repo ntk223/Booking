@@ -36,7 +36,7 @@ const BookingList = () => {
       if (response.status === 200) {
         setBookings((prevBookings) =>
           prevBookings.map((booking) =>
-            booking.booking_id === bookingId
+            booking.bookingId === bookingId
               ? { ...booking, status: newStatus }
               : booking
           )
@@ -52,6 +52,7 @@ const BookingList = () => {
     const fetchBookings = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/bookings");
+        console.log("Fetched bookings:", response.data); // Debug logging
         setBookings(response.data);
       } catch (error) {
         console.error("Error fetching bookings:", error);
@@ -64,11 +65,11 @@ const BookingList = () => {
 
   // Fetch room details when a booking is selected
   useEffect(() => {
-    if (selectedBooking?.room_id && !selectedBooking.roomDetails) {
+    if (selectedBooking?.roomId && !selectedBooking.roomDetails) {
       const fetchRoomDetails = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:5000/api/rooms/${selectedBooking.room_id}`
+            `http://localhost:5000/api/rooms/${selectedBooking.roomId}`
           );
           setSelectedBooking((prevBooking) => ({
             ...prevBooking,
@@ -111,8 +112,8 @@ const BookingList = () => {
   const columns = [
     {
       title: "ID",
-      dataIndex: "booking_id",
-      key: "booking_id",
+      dataIndex: "bookingId",
+      key: "bookingId",
       width: 80,
     },
     {
@@ -122,7 +123,7 @@ const BookingList = () => {
         console.log("Record:", record); // Kiểm tra dữ liệu ở đây
         return (
           <Button type="link" onClick={() => showBookingDetails(record)}>
-            {record.room_name || "Loading..."}
+            {record.roomName || "Loading..."}
           </Button>
         );
       },
@@ -133,7 +134,7 @@ const BookingList = () => {
       render: (record) => (
         <Space>
           <User size={16} />
-          {record.user_name || "Loading..."}
+          {record.userName || "Loading..."}
         </Space>
       ),
     },
@@ -148,8 +149,8 @@ const BookingList = () => {
           </Space>
           <Space>
             <Clock size={16} />
-            {`${formatTime(record.start_time)} - ${formatTime(
-              record.end_time
+            {`${formatTime(record.startTime)} - ${formatTime(
+              record.endTime
             )}`}
           </Space>
         </Space>
@@ -173,14 +174,14 @@ const BookingList = () => {
               <Button
                 type="primary"
                 size="small"
-                onClick={() => onStatusChange(record.booking_id, "confirmed")}
+                onClick={() => onStatusChange(record.bookingId, "confirmed")}
               >
                 Confirm
               </Button>
               <Button
                 danger
                 size="small"
-                onClick={() => onStatusChange(record.booking_id, "cancelled")}
+                onClick={() => onStatusChange(record.bookingId, "cancelled")}
               >
                 Cancel
               </Button>
@@ -208,7 +209,7 @@ const BookingList = () => {
           <Table
             columns={columns}
             dataSource={bookings}
-            rowKey="booking_id"
+            rowKey="bookingId"
             pagination={{
               pageSize: 10,
               showTotal: (total, range) =>
@@ -238,21 +239,21 @@ const BookingList = () => {
                     className="mt-4"
                   >
                     <Descriptions.Item label="Booking ID">
-                      {selectedBooking.booking_id}
+                      {selectedBooking.bookingId}
                     </Descriptions.Item>
                     <Descriptions.Item label="User">
-                      {selectedBooking.user_name || "Loading..."}
+                      {selectedBooking.userName || "Loading..."}
                     </Descriptions.Item>
                     <Descriptions.Item label="Room">
-                      {selectedBooking.room_name || "Loading..."}
+                      {selectedBooking.roomName || "Loading..."}
                     </Descriptions.Item>
                     <Descriptions.Item label="Date">
                       {formatDate(selectedBooking.date)}
                     </Descriptions.Item>
                     <Descriptions.Item label="Time">
                       {`${formatTime(
-                        selectedBooking.start_time
-                      )} - ${formatTime(selectedBooking.end_time)}`}
+                        selectedBooking.startTime
+                      )} - ${formatTime(selectedBooking.endTime)}`}
                     </Descriptions.Item>
                     <Descriptions.Item label="Status">
                       <Tag color={getStatusColor(selectedBooking.status)}>

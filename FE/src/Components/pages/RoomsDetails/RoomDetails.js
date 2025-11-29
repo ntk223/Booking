@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../Layout/Navbar/Navbar";
-import { Modal, Button, message,Spin } from "antd";
+import { Modal, Button, message, Spin } from "antd";
 import { format } from "date-fns"; // Import hàm format từ date-fns
 import { Phone, Users, MapPin, DollarSign } from "lucide-react";
 import "./RoomDetails.css";
@@ -16,8 +16,8 @@ const RoomDetails = () => {
   const [loading, setLoading] = useState(true);
   // Lấy thông tin người dùng từ sessionStorage
   const user = sessionStorage.getItem("user");
-  const userId = user ? JSON.parse(user).user.id : null;
-  const userEmail = user ? JSON.parse(user).user.email : null;
+  const userId = user ? JSON.parse(user).id : null;
+  const userEmail = user ? JSON.parse(user).email : null;
 
   useEffect(() => {
     // Lấy thông tin phòng
@@ -25,7 +25,11 @@ const RoomDetails = () => {
       .get(`/room/${id}`)
       .then((response) => {
         console.log(response);
-        setRoom(response.data[0]);
+        if (response.data.rooms && response.data.rooms.length > 0) {
+          setRoom(response.data.rooms[0]);
+        } else {
+          console.error("Room not found");
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -120,6 +124,20 @@ const RoomDetails = () => {
       </div>
     );
   }
+
+  if (!room || !room.name) {
+    return (
+      <>
+        <Navbar />
+        <div style={{ textAlign: "center", padding: "50px" }}>
+          <h2>Không tìm thấy phòng</h2>
+          <Button type="primary" onClick={() => navigate("/searchrooms")}>
+            Quay lại tìm kiếm
+          </Button>
+        </div>
+      </>
+    );
+  }
   return (
     <>
       <Navbar />
@@ -205,7 +223,7 @@ const RoomDetails = () => {
           {/* Modal */}
           <Modal
             title="Xác nhận đặt phòng"
-            visible={isModalOpen}
+            open={isModalOpen}
             onOk={handleBooking}
             onCancel={() => setIsModalOpen(false)}
             okText="Xác nhận"

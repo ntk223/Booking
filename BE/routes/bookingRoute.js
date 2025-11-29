@@ -8,4 +8,6 @@ Router.get("/", bookingController.getAllBookings);
 // Router.delete("/:id", bookingController.deleteBooking);
 Router.put("/:id", bookingController.updateBookingStatus);
 Router.put("/status/:id", bookingController.updateBookingStatus);
+Router.put("/:id/status", bookingController.updateBookingStatus);
+Router.get("/user/:userId", bookingController.getBookingsByUser);
 export const bookingRoute = Router;

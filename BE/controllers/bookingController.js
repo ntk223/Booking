@@ -249,7 +249,16 @@ class BookingController {
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: error.message });
     }
-  }
+
+    async getBookingsByUser(req, res) {
+        try {
+            const userId = req.params.userId;
+            const bookings = await bookingService.getBookingsByUser(userId);
+            res.status(StatusCodes.OK).json(bookings);
+        } catch (error) {
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        }
+    }
 }
 
 export const bookingController = new BookingController();

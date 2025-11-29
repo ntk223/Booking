@@ -39,19 +39,8 @@ const AdminRooms = () => {
 
   const fetchDistricts = async () => {
     try {
-      // const response = await axios.get(DISTRICT_API_URL);
-      // setDistricts(response.data);
-      // For now, using mock data since DISTRICT_API_URL is commented
-      setDistricts([
-        { id: 1, name: "Ba Đình" },
-        { id: 2, name: "Hoàn Kiếm" },
-        { id: 3, name: "Hai Bà Trưng" },
-        { id: 4, name: "Đống Đa" },
-        { id: 5, name: "Cầu Giấy" },
-        { id: 6, name: "Thanh Xuân" },
-        { id: 7, name: "Nam Từ Liêm" },
-        { id: 8, name: "Bắc Từ Liêm" },
-      ]);
+      const response = await axios.get("http://localhost:5000/api/districts");
+      setDistricts(response.data);
     } catch (error) {
       message.error("Lỗi khi lấy danh sách quận.");
     }
@@ -63,10 +52,16 @@ const AdminRooms = () => {
   }, [currentPage]);
 
   const handleAddRoom = async (values) => {
+    console.log("Adding room with values:", values);
     try {
       const response = await api.post(API_URL, {
         ...values,
-        district_id: values.districtId,
+        capacity: Number(values.capacity),
+        price: Number(values.price),
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       message.success("Thêm phòng thành công!");
       setIsAddModalVisible(false);
@@ -78,10 +73,17 @@ const AdminRooms = () => {
   };
 
   const handleUpdate = async (values) => {
+    console.log("Updating room with values:", values);
     try {
+
       const response = await api.put(`${API_URL}/${selectedRoom.id}`, {
         ...values,
-        district_id: values.districtId,
+        capacity: Number(values.capacity),
+        price: Number(values.price),
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       setRooms(
         rooms.map((room) =>
@@ -217,7 +219,7 @@ const AdminRooms = () => {
           {/* Modal cập nhật phòng */}
           <Modal
             title={`Cập nhật phòng: ${selectedRoom?.name}`}
-            visible={isModalVisible}
+            open={isModalVisible}
             onCancel={() => {
               setIsModalVisible(false);
               form.resetFields(); // Reset form khi đóng modal
@@ -303,7 +305,7 @@ const AdminRooms = () => {
           {/* Modal thêm phòng */}
           <Modal
             title="Thêm phòng mới"
-            visible={isAddModalVisible}
+            open={isAddModalVisible}
             onCancel={() => {
               setIsAddModalVisible(false);
               addForm.resetFields();
