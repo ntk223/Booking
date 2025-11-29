@@ -211,7 +211,7 @@ export function api_burst_test(data) {
     for (let i = 0; i < 3; i++) { // Mỗi VU gửi 3 requests đồng thời
         requests.push({
             method: 'GET',
-            url: `${BASE_URL}/api/room?page=${i + 1}`,
+            url: `${BASE_URL}/api/rooms?page=${i + 1}`,
             params: {
                 headers: {
                     'Content-Type': 'application/json',
@@ -253,7 +253,7 @@ export function api_sustained_test(data) {
     
     console.log(`${tag} VU ${__VU} sustained test with user: ${testUser.email}`);
     
-    const res = http.get(`${BASE_URL}/api/room?page=${Math.floor(Math.random() * 3) + 1}`, {
+    const res = http.get(`${BASE_URL}/api/rooms?page=${Math.floor(Math.random() * 3) + 1}`, {
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${userToken}`
@@ -288,7 +288,7 @@ export function api_spike_test(data) {
     console.log(`${tag} VU ${__VU} spike test with user: ${testUser.email}`);
     
     // Trong spike test, gửi requests nhanh hơn
-    const res = http.get(`${BASE_URL}/api/room?page=${Math.floor(Math.random() * 10) + 1}`, {
+    const res = http.get(`${BASE_URL}/api/rooms?page=${Math.floor(Math.random() * 10) + 1}`, {
         headers: {
             'Content-Type': 'application/json', 
             'Authorization': `Bearer ${userToken}`
@@ -383,7 +383,7 @@ export default function (data) {
         for (let i = 0; i < 3; i++) {
             requests.push({
                 method: 'GET',
-                url: `${BASE_URL}/api/room?page=1`,
+                url: `${BASE_URL}/api/rooms?page=1`,
                 params: params
             });
         }

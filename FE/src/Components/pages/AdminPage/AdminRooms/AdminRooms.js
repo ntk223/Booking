@@ -7,7 +7,7 @@ import "./AdminRooms.css";
 import { AiFillDelete, AiOutlineUpload } from "react-icons/ai";
 import { Upload } from "antd";
 
-const API_URL = "/room";
+const API_URL = "/rooms";
 const STORAGE_API_URL = "/storage";
 // const DISTRICT_API_URL = "http://localhost:5000/api/districts";
 
@@ -39,7 +39,7 @@ const AdminRooms = () => {
 
   const fetchDistricts = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/districts");
+      const response = await api.get("/districts");
       setDistricts(response.data);
     } catch (error) {
       message.error("Lỗi khi lấy danh sách quận.");
@@ -58,10 +58,6 @@ const AdminRooms = () => {
         ...values,
         capacity: Number(values.capacity),
         price: Number(values.price),
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
       message.success("Thêm phòng thành công!");
       setIsAddModalVisible(false);
@@ -80,11 +76,7 @@ const AdminRooms = () => {
         ...values,
         capacity: Number(values.capacity),
         price: Number(values.price),
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+        });
       setRooms(
         rooms.map((room) =>
           room.id === selectedRoom.id ? response.data : room
