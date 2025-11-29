@@ -1,4 +1,5 @@
 BE/node_modules
 BE/.env
+*.log
 FE/node_modules
 BE/booking-479609-266f6b7b41a1.json

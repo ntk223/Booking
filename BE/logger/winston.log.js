@@ -63,15 +63,15 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    // new winston.transports.File({
-    //   filename: path.join(logDir, "error.log"),
-    //   level: "error",
-    //   options: { flags: "a" },
-    // }),
-    // new winston.transports.File({
-    //   filename: path.join(logDir, "app.log"),
-    //   options: { flags: "a" },
-    // }),
+    new winston.transports.File({
+      filename: path.join(logDir, "error.log"),
+      level: "error",
+      options: { flags: "a" },
+    }),
+    new winston.transports.File({
+      filename: path.join(logDir, "app.log"),
+      options: { flags: "a" },
+    }),
   ],
 });
 
