@@ -1,5 +1,7 @@
 import express from "express";
 import { bookingController } from "../controllers/bookingController.js";
+import { validationMiddleware } from "../middlewares/validationMiddleware.js";
+import { createBookingSchema, updateBookingStatusSchema } from "../validations/bookingValidation.js";
 
 const Router = express.Router();
 
@@ -43,7 +45,7 @@ const Router = express.Router();
  *       400:
  *         description: Invalid input or room already booked
  */
-Router.post("/", bookingController.createBooking);
+Router.post("/", validationMiddleware(createBookingSchema), bookingController.createBooking);
 
 /**
  * @swagger
@@ -96,9 +98,9 @@ Router.get("/", bookingController.getAllBookings);
  *       200:
  *         description: Booking status updated
  */
-Router.put("/:id", bookingController.updateBookingStatus);
-Router.put("/status/:id", bookingController.updateBookingStatus);
-Router.put("/:id/status", bookingController.updateBookingStatus);
+Router.put("/:id", validationMiddleware(updateBookingStatusSchema), bookingController.updateBookingStatus);
+Router.put("/status/:id", validationMiddleware(updateBookingStatusSchema), bookingController.updateBookingStatus);
+Router.put("/:id/status", validationMiddleware(updateBookingStatusSchema), bookingController.updateBookingStatus);
 
 /**
  * @swagger
@@ -119,4 +121,5 @@ Router.put("/:id/status", bookingController.updateBookingStatus);
  *         description: List of user bookings
  */
 Router.get("/user/:userId", bookingController.getBookingsByUser);
+
 export const bookingRoute = Router;

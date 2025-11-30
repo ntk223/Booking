@@ -30,6 +30,7 @@
     "express-session": "^1.18.1",
     "express-status-monitor": "^1.2.3",
     "http-status-codes": "^2.3.0",
+    "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "mysql2": "^3.11.5",
