@@ -1,108 +1,118 @@
 import { Room, District, Equipment, Booking, sequelize } from "../models/Model.js";
 import { Op } from "sequelize";
-const PAGE_SIZE = 20;
-class RoomRepository {
+import { BaseRepository } from "./BaseRepository.js";
+
+class RoomRepository extends BaseRepository {
+    constructor() {
+        super(Room);
+    }
+
     async createRoom(roomData) {
-        const totalRooms = await Room.count();
-        const totalRoomsBeforeAtPage = totalRooms % PAGE_SIZE;
-        const currentPage = Math.ceil((totalRooms + 1) / PAGE_SIZE);
-        const roomCreated = await Room.create(roomData);
-        if (totalRoomsBeforeAtPage === 0 && totalRooms !== 0) {
-            // New page created
-            return { roomCreated, currentPage: null };
-        }
+        const { currentPage } = await this.getPageForNewItem();
+        const roomCreated = await this.create(roomData);
         return { roomCreated, currentPage };
     }
 
     async getRoomDetails(roomId = null, pageNumber) {
-        // await new Promise(resolve => setTimeout(resolve, 1000));
-
-
         const query = {
-            attributes: ['id', 'name', 'location', 'capacity', 'imageUrl', 'price', 'districtId'],
+            attributes: [
+                "id",
+                "name",
+                "location",
+                "capacity",
+                "imageUrl",
+                "price",
+                "districtId",
+            ],
             include: [
                 {
                     model: District,
-                    as: 'district',
-                    attributes: ['name'],
+                    as: "district",
+                    attributes: ["name"],
                 },
                 {
                     model: Equipment,
-                    as: 'equipments',
-                    attributes: ['name'],
+                    as: "equipments",
+                    attributes: ["name"],
                     through: { attributes: [] },
                     required: false,
                 },
             ],
-        }
+        };
+
         if (roomId) {
-            query.where = { id: roomId };
+            const room = await this.findById(roomId, query);
+            if (!room) return null;
+            return this._formatRoom(room);
+        } else if (pageNumber) {
+            const { data, currentPage, totalPages } = await this.paginate(
+                pageNumber,
+                query
+            );
+            return {
+                rooms: data.map((room) => this._formatRoom(room)),
+                currentPage,
+                totalPages,
+            };
         }
-        else if (pageNumber) {
-            query.limit = PAGE_SIZE;
-            query.offset = (pageNumber - 1) * PAGE_SIZE;
-        }
+    }
 
-        const rooms = await Room.findAll(query);
-
+    _formatRoom(room) {
         return {
-            rooms: rooms.map(room => ({
-                id: room.id,
-                name: room.name,
-                location: room.location,
-                capacity: room.capacity,
-                imageUrl: room.imageUrl,
-                district: room.district?.name || null,
-                districtId: room.districtId,
-                equipments: room.equipments.map(e => e.name),
-                price: room.price,
-            })),
-            currentPage: pageNumber,
-            totalPages: Math.ceil(await Room.count() / PAGE_SIZE)
+            id: room.id,
+            name: room.name,
+            location: room.location,
+            capacity: room.capacity,
+            imageUrl: room.imageUrl,
+            district: room.district?.name || null,
+            districtId: room.districtId,
+            equipments: room.equipments ? room.equipments.map((e) => e.name) : [],
+            price: room.price,
         };
     }
 
     async deleteRoom(roomId) {
-        const roomBefore = await Room.findAll({
+        const roomBefore = await this.model.findAll({
             where: {
                 id: {
-                    [Op.lt]: roomId
-                }
-            }
-        })
-        const totalPages = Math.ceil(await Room.count() / PAGE_SIZE);
-        const currentPage = Math.ceil((roomBefore.length + 1) / PAGE_SIZE);
-        await Room.destroy({ where: { id: roomId } });
+                    [Op.lt]: roomId,
+                },
+            },
+        });
+        const totalPages = Math.ceil((await this.count()) / this.pageSize);
+        const currentPage = Math.ceil((roomBefore.length + 1) / this.pageSize);
+        await this.delete(roomId);
         return { totalPages, currentPage };
     }
 
     async updateRoom(roomId, updatedData) {
-
-        const roomBefore = await Room.findAll({
+        const roomBefore = await this.model.findAll({
             where: {
                 id: {
-                    [Op.lt]: roomId
-                }
-            }
-        })
-        const currentPage = Math.ceil((roomBefore.length + 1) / PAGE_SIZE);
-        return { room: await Room.update(updatedData, { where: { id: roomId } }), currentPage };
+                    [Op.lt]: roomId,
+                },
+            },
+        });
+        const currentPage = Math.ceil((roomBefore.length + 1) / this.pageSize);
+        await this.update(roomId, updatedData);
+        const room = await this.findById(roomId);
+        return { room, currentPage };
     }
 
     /**
-        testCriteria = {
-            "capacity": "50",
-            "districtId": "2",
-            "searchDate": "2024-07-20",
-            "startTime": "10:00",
-            "endTime": "12:00"
-        };
-     */
+          testCriteria = {
+              "capacity": "50",
+              "districtId": "2",
+              "searchDate": "2024-07-20",
+              "startTime": "10:00",
+              "endTime": "12:00"
+          };
+       */
     async searchRooms(criteria) {
         const { capacity, districtId, searchDate, startTime, endTime } = criteria;
 
         try {
-            const rooms = await Room.findAll({
+            const rooms = await this.findAll({
                 attributes: [
                     "id",
                     "name",
@@ -110,7 +120,7 @@ class RoomRepository {
                     "capacity",
                     "price",
                     "imageUrl",
-                    [sequelize.literal(`'available'`), "current_status"]
+                    [sequelize.literal(`'available'`), "current_status"],
                 ],
                 include: [
                     {

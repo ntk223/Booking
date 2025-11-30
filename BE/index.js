@@ -10,6 +10,7 @@ import { healthChecker } from "./utils/HealthChecker.js";
 import safeRedisClient from "./config/redis.js";
 import logger from "./logger/winston.log.js";
 import { requestIdMiddleware } from "./middlewares/requestIdMiddleware.js";
+import { requestLoggerMiddleware } from "./middlewares/requestLoggerMiddleware.js";
 
 const START_SERVER = () => {
   const app = express();
@@ -18,6 +19,7 @@ const START_SERVER = () => {
 
   // Request ID middleware (before other middlewares and routes)
   app.use(requestIdMiddleware);
+  app.use(requestLoggerMiddleware);
 
   // Health check endpoints (before API routes for fast response)
 

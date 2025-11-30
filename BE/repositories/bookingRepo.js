@@ -1,13 +1,18 @@
 import { Booking, User, Room } from "../models/Model.js";
+import { BaseRepository } from "./BaseRepository.js";
 
-class BookingRepository {
+class BookingRepository extends BaseRepository {
+    constructor() {
+        super(Booking);
+    }
+
     async createBooking(bookingData, transaction) {
-        return await Booking.create(bookingData, { transaction });
+        return await this.create(bookingData, { transaction });
     }
 
     async getBookingDetails(bookingId = null) {
         const whereClause = bookingId ? { id: bookingId } : {};
-        const bookings = await Booking.findAll({
+        const bookings = await this.findAll({
             attributes: [
                 "id",
                 "date",
@@ -51,14 +56,11 @@ class BookingRepository {
     }
 
     async updateBookingStatus(bookingId, status) {
-        return await Booking.update(
-            { status: status },
-            { where: { id: bookingId } }
-        );
+        return await this.update(bookingId, { status: status });
     }
 
     async getBookingsByUserId(userId) {
-        const bookings = await Booking.findAll({
+        const bookings = await this.findAll({
             attributes: [
                 "id",
                 "date",
