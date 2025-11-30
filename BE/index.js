@@ -4,7 +4,7 @@ import { APIs } from "./routes/index.js";
 import { env } from "./config/environment.js";
 import { errorHandlingMiddleware } from "./middlewares/errorHandlingMiddleware.js";
 import { corsOptions } from "./config/cors.js";
-// import { swaggerDocs } from './config/swagger.js'
+import { swaggerDocs } from './config/swagger.js';
 import cors from "cors";
 import { healthChecker } from "./utils/HealthChecker.js";
 import safeRedisClient from "./config/redis.js";
@@ -51,8 +51,10 @@ const START_SERVER = () => {
 
   // Xử lý lỗi tập trung trong ứng dụng
   app.use(errorHandlingMiddleware);
+
   // Tài liệu API với Swagger
-  // swaggerDocs (app)
+  swaggerDocs(app);
+
   // Kết nối Database
   const server = app.listen(env.APP_PORT, () => {
     logger.info(`Booking System Server Started`);
