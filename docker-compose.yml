@@ -98,6 +98,14 @@ services:
       loki:
         condition: service_healthy
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: booking_prometheus
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./grafana/provisioning/datasources/prometheus.yml:/etc/prometheus/prometheus.yml
+
 volumes:
   mysql_data:
     driver: local

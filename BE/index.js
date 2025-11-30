@@ -10,14 +10,26 @@ import { healthChecker } from "./utils/HealthChecker.js";
 import safeRedisClient from "./config/redis.js";
 import logger from "./logger/winston.log.js";
 import { requestIdMiddleware } from "./middlewares/requestIdMiddleware.js";
+import client from "prom-client";
 
 const START_SERVER = () => {
   const app = express();
+
+  const collectDefaultMetrics = client.collectDefaultMetrics;
+  const prefix = "booking_app_";
+  collectDefaultMetrics({ prefix: prefix });
+
   app.use(cors(corsOptions));
   app.use(express.json());
 
   // Request ID middleware (before other middlewares and routes)
   app.use(requestIdMiddleware);
+
+  // Prometheus metrics endpoint
+  app.get("/metrics", async (req, res) => {
+    res.set("Content-Type", client.register.contentType);
+    res.end(await client.register.metrics());
+  });
 
   // Health check endpoints (before API routes for fast response)
 
