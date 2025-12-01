@@ -1,6 +1,5 @@
 import express from "express";
-import { roomController } from "../controllers/roomController.js";
-import { roomService } from "../services/roomService.js";
+
 import { roomRepo } from "../repositories/roomRepo.js";
 import { cacheManager } from "../utils/CacheManager.js";
 import { RoomService } from "../services/roomService.js";
