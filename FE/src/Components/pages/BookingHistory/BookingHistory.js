@@ -87,11 +87,11 @@ const BookingHistory = () => {
     },
     {
       title: "Phòng",
-      key: "room",
+      key: "roomId",
       render: (record) => (
         <a
           onClick={() => showBookingDetails(record)}
-        >{`Room ${record.name}`}</a>
+        >{`Room ${record.roomId}`}</a>
       ),
     },
     {
@@ -105,8 +105,8 @@ const BookingHistory = () => {
           </div>
           <div>
             <Clock size={16} />
-            {`${formatTime(record.start_time)} - ${formatTime(
-              record.end_time
+            {`${formatTime(record.startTime)} - ${formatTime(
+              record.endTime
             )}`}
           </div>
         </>
@@ -132,8 +132,8 @@ const BookingHistory = () => {
     },
     {
       title: "Ngày đặt phòng",
-      dataIndex: "created_at",
-      key: "created_at",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (date) => formatDate(date),
     },
   ];
