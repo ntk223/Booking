@@ -11,7 +11,7 @@ import safeRedisClient from "./config/redis.js";
 import logger from "./logger/winston.log.js";
 import { requestIdMiddleware } from "./middlewares/requestIdMiddleware.js";
 import { requestLoggerMiddleware } from "./middlewares/requestLoggerMiddleware.js";
-import { getMetrics, getContentType } from "./utils/metrics.js";
+import { getMetrics, getContentType, httpRequestDurationMicroseconds } from "./utils/metrics.js";
 import GCPService from "./services/GCPService.js";
 
 const START_SERVER = () => {
@@ -22,6 +22,18 @@ const START_SERVER = () => {
   // Request ID middleware (before other middlewares and routes)
   app.use(requestIdMiddleware);
   app.use(requestLoggerMiddleware);
+
+  // Prometheus Latency Middleware
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      httpRequestDurationMicroseconds
+        .labels(req.method, req.route ? req.route.path : req.path, res.statusCode)
+        .observe(duration / 1000); // Convert to seconds
+    });
+    next();
+  });
 
   // Health check endpoints (before API routes for fast response)
 
