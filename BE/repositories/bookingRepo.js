@@ -102,5 +102,5 @@ class BookingRepository extends BaseRepository {
         }));
     }
 }
-
+export { BookingRepository };
 export const bookingRepo = new BookingRepository();

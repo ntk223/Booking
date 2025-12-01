@@ -1,10 +1,13 @@
-import { bookingRepo } from "../repositories/bookingRepo.js";
-import { rawRedisClient } from "../config/redis.js";
-import sequelize from "../config/database.js";
 import { Op } from "sequelize";
 import { Booking } from "../models/Model.js";
 
 class BookingService {
+    constructor(bookingRepo, redisClient, sequelize) {
+        this.bookingRepo = bookingRepo;
+        this.redisClient = redisClient;
+        this.sequelize = sequelize;
+    }
+
     async createBooking(bookingData) {
         // Create distributed lock key
         const lockKey = `booking:lock:${bookingData.roomId}:${bookingData.date}:${bookingData.startTime}`;
@@ -15,7 +18,7 @@ class BookingService {
 
         try {
             // Try to acquire distributed lock using Redis
-            lockAcquired = await rawRedisClient.set(lockKey, lockValue, {
+            lockAcquired = await this.redisClient.set(lockKey, lockValue, {
                 EX: lockTTL,
                 NX: true  // Only set if not exists
             });
@@ -25,7 +28,7 @@ class BookingService {
             }
 
             // Use database transaction with Redis lock for double protection
-            return await sequelize.transaction(async (t) => {
+            return await this.sequelize.transaction(async (t) => {
                 // Check for overlapping bookings
                 const existingBookings = await Booking.findAll({
                     where: {
@@ -49,7 +52,7 @@ class BookingService {
                     throw new Error("Room is already booked for the selected time slot.");
                 }
 
-                return await bookingRepo.createBooking(bookingData, t);
+                return await this.bookingRepo.createBooking(bookingData, t);
             });
         } catch (error) {
             throw error;
@@ -57,10 +60,10 @@ class BookingService {
             // Release Redis lock if we acquired it
             if (lockAcquired) {
                 try {
-                    const currentValue = await rawRedisClient.get(lockKey);
+                    const currentValue = await this.redisClient.get(lockKey);
                     // Only delete if we still own the lock
                     if (currentValue === lockValue) {
-                        await rawRedisClient.del(lockKey);
+                        await this.redisClient.del(lockKey);
                     }
                 } catch (err) {
                     console.error('[ERROR] Failed to release Redis lock:', err.message);
@@ -70,24 +73,24 @@ class BookingService {
     }
 
     async getAllBookings() {
-        return await bookingRepo.getBookingDetails();
+        return await this.bookingRepo.getBookingDetails();
     }
 
     async deleteBooking(bookingId) {
-        return await bookingRepo.deleteBooking(bookingId);
+        return await this.bookingRepo.deleteBooking(bookingId);
     }
 
     async updateBookingStatus(bookingId, status) {
-        return await bookingRepo.updateBookingStatus(bookingId, status);
+        return await this.bookingRepo.updateBookingStatus(bookingId, status);
     }
 
     async getBookingDetails(bookingId) {
-        return await bookingRepo.getBookingDetails(bookingId);
+        return await this.bookingRepo.getBookingDetails(bookingId);
     }
 
     async getBookingsByUser(userId) {
-        return await bookingRepo.getBookingsByUserId(userId);
+        return await this.bookingRepo.getBookingsByUserId(userId);
     }
 }
 
-export const bookingService = new BookingService();
+export { BookingService };

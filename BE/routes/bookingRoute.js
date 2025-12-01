@@ -1,7 +1,15 @@
 import express from "express";
-import { bookingController } from "../controllers/bookingController.js";
-import { validationMiddleware } from "../middlewares/validationMiddleware.js";
+import { BookingController } from "../controllers/bookingController.js";
+import { BookingService } from "../services/bookingService.js";
+import { bookingRepo } from "../repositories/bookingRepo.js";
+import { rawRedisClient } from "../config/redis.js";
+import sequelize from "../config/database.js";
+import { validate } from "../middlewares/validateMiddleware.js";
 import { createBookingSchema, updateBookingStatusSchema } from "../validations/bookingValidation.js";
+
+// Dependency Injection
+const myBookingService = new BookingService(bookingRepo, rawRedisClient, sequelize);
+const myBookingController = new BookingController(myBookingService);
 
 const Router = express.Router();
 
@@ -45,7 +53,7 @@ const Router = express.Router();
  *       400:
  *         description: Invalid input or room already booked
  */
-Router.post("/", validationMiddleware(createBookingSchema), bookingController.createBooking);
+Router.post("/", validate(createBookingSchema), myBookingController.createBooking);
 
 /**
  * @swagger
@@ -65,8 +73,8 @@ Router.post("/", validationMiddleware(createBookingSchema), bookingController.cr
  *               items:
  *                 type: object
  */
-Router.get("/", bookingController.getAllBookings);
-// Router.delete("/:id", bookingController.deleteBooking);
+Router.get("/", myBookingController.getAllBookings);
+// Router.delete("/:id", myBookingController.deleteBooking);
 
 /**
  * @swagger
@@ -98,9 +106,9 @@ Router.get("/", bookingController.getAllBookings);
  *       200:
  *         description: Booking status updated
  */
-Router.put("/:id", validationMiddleware(updateBookingStatusSchema), bookingController.updateBookingStatus);
-Router.put("/status/:id", validationMiddleware(updateBookingStatusSchema), bookingController.updateBookingStatus);
-Router.put("/:id/status", validationMiddleware(updateBookingStatusSchema), bookingController.updateBookingStatus);
+Router.put("/:id", validate(updateBookingStatusSchema), myBookingController.updateBookingStatus);
+Router.put("/status/:id", validate(updateBookingStatusSchema), myBookingController.updateBookingStatus);
+Router.put("/:id/status", validate(updateBookingStatusSchema), myBookingController.updateBookingStatus);
 
 /**
  * @swagger
@@ -120,6 +128,6 @@ Router.put("/:id/status", validationMiddleware(updateBookingStatusSchema), booki
  *       200:
  *         description: List of user bookings
  */
-Router.get("/user/:userId", bookingController.getBookingsByUser);
+Router.get("/user/:userId", myBookingController.getBookingsByUser);
 
 export const bookingRoute = Router;

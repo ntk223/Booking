@@ -84,4 +84,4 @@ class GCPService {
     }
 }
 
-export default new GCPService();
+export { GCPService };

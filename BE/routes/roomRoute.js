@@ -1,7 +1,19 @@
 import express from "express";
 import { roomController } from "../controllers/roomController.js";
+import { roomService } from "../services/roomService.js";
+import { roomRepo } from "../repositories/roomRepo.js";
+import { cacheManager } from "../utils/CacheManager.js";
+import { RoomService } from "../services/roomService.js";
+import { RoomController } from "../controllers/roomController.js";
+import { validate } from "../middlewares/validateMiddleware.js";
+import { createRoomSchema, updateRoomSchema, searchRoomSchema } from "../validations/roomValidation.js";
 import rateLimitMiddleware from "../middlewares/rateLimitMiddleware.js";
 import verifyTokenMiddleware from "../middlewares/verifyTokenMiddleware.js";
+
+// Dependency Injection
+const myRoomService = new RoomService(roomRepo, cacheManager);
+const myRoomController = new RoomController(myRoomService);
+
 const Router = express.Router()
 Router.use(rateLimitMiddleware({ capacity: 20, refillRate: 1 }));
 
@@ -23,7 +35,7 @@ Router.use(rateLimitMiddleware({ capacity: 20, refillRate: 1 }));
  *               items:
  *                 type: object
  */
-Router.get("/", roomController.getRooms);
+Router.get("/", myRoomController.getRooms);
 
 /**
  * @swagger
@@ -43,7 +55,7 @@ Router.get("/", roomController.getRooms);
  *       404:
  *         description: Room not found
  */
-Router.get("/:id", roomController.getRoomDetails);
+Router.get("/:id", myRoomController.getRoomDetails);
 
 /**
  * @swagger
@@ -66,7 +78,7 @@ Router.get("/:id", roomController.getRoomDetails);
  *       200:
  *         description: List of rooms matching criteria
  */
-Router.post("/search", roomController.searchRooms);
+Router.post("/search", validate(searchRoomSchema), myRoomController.searchRooms);
 
 // Protected routes
 Router.use(verifyTokenMiddleware);
@@ -104,7 +116,7 @@ Router.use(verifyTokenMiddleware);
  *       201:
  *         description: Room created successfully
  */
-Router.post("/", roomController.createRoom);
+Router.post("/", validate(createRoomSchema), myRoomController.createRoom);
 
 /**
  * @swagger
@@ -124,7 +136,7 @@ Router.post("/", roomController.createRoom);
  *       200:
  *         description: Room deleted successfully
  */
-Router.delete("/:id", roomController.deleteRoom);
+Router.delete("/:id", myRoomController.deleteRoom);
 
 /**
  * @swagger
@@ -157,6 +169,6 @@ Router.delete("/:id", roomController.deleteRoom);
  *       200:
  *         description: Room updated successfully
  */
-Router.put("/:id", roomController.updateRoom);
+Router.put("/:id", validate(updateRoomSchema), myRoomController.updateRoom);
 export const roomRoute = Router;
 

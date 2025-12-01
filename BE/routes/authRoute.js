@@ -1,6 +1,15 @@
 import express from "express";
-import { userController } from "../controllers/userController.js";
+import { UserController } from "../controllers/userController.js";
+import { UserService } from "../services/userService.js";
+import { userRepo } from "../repositories/userRepo.js";
+import { validate } from "../middlewares/validateMiddleware.js";
+import { loginSchema, createUserSchema } from "../validations/userValidation.js";
 import rateLimitMiddleware from "../middlewares/rateLimitMiddleware.js";
+
+// Dependency Injection
+const myUserService = new UserService(userRepo);
+const myUserController = new UserController(myUserService);
+
 const Router = express.Router();
 
 Router.use(rateLimitMiddleware({ capacity: 10, refillRate: 0.5 }));
@@ -40,7 +49,7 @@ Router.use(rateLimitMiddleware({ capacity: 10, refillRate: 0.5 }));
  *       401:
  *         description: Invalid credentials
  */
-Router.post("/login", userController.login);
+Router.post("/login", validate(loginSchema), myUserController.login);
 
 /**
  * @swagger
@@ -71,6 +80,6 @@ Router.post("/login", userController.login);
  *       400:
  *         description: Invalid input
  */
-Router.post("/register", userController.register);
+Router.post("/register", validate(createUserSchema), myUserController.createUser);
 
 export const authRoute = Router;

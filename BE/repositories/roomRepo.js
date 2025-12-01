@@ -162,4 +162,5 @@ class RoomRepository extends BaseRepository {
         }
     }
 }
+export { RoomRepository };
 export const roomRepo = new RoomRepository();

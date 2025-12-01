@@ -1,51 +1,39 @@
-import { userService } from "../services/userService.js";
 import { StatusCodes } from "http-status-codes";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { UserDTO } from "../dtos/UserDTO.js";
 
-class UserController {
+export class UserController {
+  constructor(userService) {
+    this.userService = userService;
+  }
+
   createUser = asyncHandler(async (req, res) => {
     const userData = req.body;
-    const newUser = await userService.createUser(userData);
-    res.status(StatusCodes.CREATED).json(newUser);
+    const newUser = await this.userService.createUser(userData);
+    res.status(StatusCodes.CREATED).json(new UserDTO(newUser));
   });
 
   getAllUsers = asyncHandler(async (req, res) => {
-    const users = await userService.getAllUsers();
-    res.status(StatusCodes.OK).json(users);
+    const users = await this.userService.getAllUsers();
+    res.status(StatusCodes.OK).json(users.map(u => new UserDTO(u)));
   });
 
   deleteUser = asyncHandler(async (req, res) => {
     const userId = req.params.id;
-    await userService.deleteUser(userId);
-    res.status(StatusCodes.NO_CONTENT).send();
+    await this.userService.deleteUser(userId);
+    res.status(StatusCodes.OK).json({ message: "User deleted successfully" });
   });
 
   updateUser = asyncHandler(async (req, res) => {
     const userId = req.params.id;
     const updatedData = req.body;
-    const updatedUser = await userService.updateUser(userId, updatedData);
-    res.status(StatusCodes.OK).json(updatedUser);
+    await this.userService.updateUser(userId, updatedData);
+    res.status(StatusCodes.OK).json({ message: "User updated successfully" });
   });
 
   login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    const { user, token } = await userService.login(email, password);
-
-    if (user) {
-      res.status(StatusCodes.OK).json({ user, token });
-    } else {
-      const error = new Error("Invalid email or password");
-      error.statusCode = StatusCodes.UNAUTHORIZED;
-      throw error;
-    }
-  });
-
-  register = asyncHandler(async (req, res) => {
-    const user = await userService.createUser(req.body);
-    res
-      .status(StatusCodes.CREATED)
-      .json({ message: "User registered successfully", user });
+    const { user, token } = await this.userService.login(email, password);
+    res.status(StatusCodes.OK).json({ user: new UserDTO(user), token });
   });
 }
-
-export const userController = new UserController();

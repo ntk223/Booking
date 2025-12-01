@@ -12,7 +12,9 @@ import logger from "./logger/winston.log.js";
 import { requestIdMiddleware } from "./middlewares/requestIdMiddleware.js";
 import { requestLoggerMiddleware } from "./middlewares/requestLoggerMiddleware.js";
 import { getMetrics, getContentType, httpRequestDurationMicroseconds } from "./utils/metrics.js";
-import GCPService from "./services/GCPService.js";
+import { GCPService } from "./services/GCPService.js";
+
+const myGCPService = new GCPService();
 
 const START_SERVER = () => {
   const app = express();
@@ -51,12 +53,10 @@ const START_SERVER = () => {
     res.status(statusCode).json(health);
   });
 
-
-
   // Circuit breaker status endpoint
   app.get("/health/circuits", (req, res) => {
     const redisCircuitStatus = safeRedisClient.getCircuitStatus();
-    const gcsCircuitStatus = GCPService.getCircuitStatus();
+    const gcsCircuitStatus = myGCPService.getCircuitStatus();
 
     res.status(200).json({
       timestamp: new Date().toISOString(),

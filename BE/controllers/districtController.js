@@ -9,4 +9,3 @@ export class DistrictController {
     });
 }
 
-export const districtController = new DistrictController();

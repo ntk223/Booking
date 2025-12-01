@@ -30,3 +30,4 @@ export const updateBookingStatusSchema = Joi.object({
         "any.required": "Status is required"
     })
 });
+

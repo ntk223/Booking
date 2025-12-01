@@ -1,13 +1,19 @@
-import { bookingService } from "../services/bookingService.js";
+
 import { StatusCodes } from "http-status-codes";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-class BookingController {
+import { BookingDTO } from "../dtos/BookingDTO.js";
+
+export class BookingController {
+  constructor(bookingService) {
+    this.bookingService = bookingService;
+  }
+
   createBooking = asyncHandler(async (req, res) => {
     try {
       const bookingData = req.body;
-      const newBooking = await bookingService.createBooking(bookingData);
-      res.status(StatusCodes.CREATED).json(newBooking);
+      const newBooking = await this.bookingService.createBooking(bookingData);
+      res.status(StatusCodes.CREATED).json(new BookingDTO(newBooking));
     } catch (error) {
       if (
         error.message.includes("already booked") ||
@@ -26,28 +32,26 @@ class BookingController {
   });
 
   getAllBookings = asyncHandler(async (req, res) => {
-    const bookings = await bookingService.getAllBookings();
-    res.status(StatusCodes.OK).json(bookings);
+    const bookings = await this.bookingService.getAllBookings();
+    res.status(StatusCodes.OK).json(bookings.map(b => new BookingDTO(b)));
   });
 
   getBookingDetails = asyncHandler(async (req, res) => {
     const bookingId = req.params.id;
-    const bookingDetails = await bookingService.getBookingDetails(bookingId);
-    res.status(StatusCodes.OK).json(bookingDetails);
+    const bookingDetails = await this.bookingService.getBookingDetails(bookingId);
+    res.status(StatusCodes.OK).json(bookingDetails.map(b => new BookingDTO(b)));
   });
 
   updateBookingStatus = asyncHandler(async (req, res) => {
     const bookingId = req.params.id;
     const { status } = req.body;
-    await bookingService.updateBookingStatus(bookingId, status);
+    await this.bookingService.updateBookingStatus(bookingId, status);
     res.status(StatusCodes.OK).send();
   });
 
   getBookingsByUser = asyncHandler(async (req, res) => {
     const userId = req.params.userId;
-    const bookings = await bookingService.getBookingsByUser(userId);
-    res.status(StatusCodes.OK).json(bookings);
+    const bookings = await this.bookingService.getBookingsByUser(userId);
+    res.status(StatusCodes.OK).json(bookings.map(b => new BookingDTO(b)));
   });
 }
-
-export const bookingController = new BookingController();
