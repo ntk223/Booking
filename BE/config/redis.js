@@ -6,6 +6,7 @@ import { registerCircuitBreaker } from "../utils/metrics.js";
 
 const redisClient = redis.createClient({
   url: `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`,
+  disableOfflineQueue: true,
   socket: {
     reconnectStrategy: (retries) => {
       if (retries > 10) {
