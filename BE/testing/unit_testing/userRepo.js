@@ -413,7 +413,7 @@ describe("UserRepository - Complete Testing", () => {
       expect(result).toBeGreaterThanOrEqual(0);
     });
 
-    test("DU_04: nominal userId", async () => {
+    test("DU_04: nom userId", async () => {
       const userIdToDelete = testUserIds[1];
       const result = await userRepo.deleteUser(userIdToDelete);
       expect(result).toBe(1);
@@ -486,7 +486,7 @@ describe("UserRepository - Complete Testing", () => {
       expect(result).toBeGreaterThanOrEqual(0);
     });
 
-    test("UU_04: nominal userId", async () => {
+    test("UU_04: nom userId", async () => {
       const updateData = {
         name: "Successfully Updated User",
         phone: "9876543210",

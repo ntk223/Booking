@@ -24,13 +24,11 @@ describe("BookingRepository - Boundary Testing", () => {
   });
 
   beforeEach(async () => {
-    // Clean all tables
     await Booking.destroy({ where: {}, force: true });
     await Room.destroy({ where: {}, force: true });
     await User.destroy({ where: {}, force: true });
     await District.destroy({ where: {}, force: true });
 
-    // Create test data
     testDistrict = await District.create({
       name: "Test District",
       description: "Test District Description",
@@ -98,7 +96,7 @@ describe("BookingRepository - Boundary Testing", () => {
       }
     });
 
-    test("CB_BD4: nominal roomId (valid)", async () => {
+    test("CB_BD4: nom roomId (valid)", async () => {
       const bookingData = {
         roomId: testRoom.id,
         userId: testUser.id,
@@ -165,8 +163,6 @@ describe("BookingRepository - Boundary Testing", () => {
 
       await expect(bookingRepo.createBooking(bookingData)).rejects.toThrow();
     });
-
-
   });
 
   describe("getBookingDetails - Boundary Testing", () => {
@@ -212,10 +208,9 @@ describe("BookingRepository - Boundary Testing", () => {
       const result = await bookingRepo.getBookingDetails(1);
 
       expect(Array.isArray(result)).toBe(true);
-      // May or may not find booking depending on database state
     });
 
-    test("GBD_BD4: nominal bookingId (existing)", async () => {
+    test("GBD_BD4: nom bookingId ", async () => {
       const result = await bookingRepo.getBookingDetails(testBookingIds[0]);
 
       expect(Array.isArray(result)).toBe(true);
@@ -250,16 +245,15 @@ describe("BookingRepository - Boundary Testing", () => {
       const result = await bookingRepo.getBookingDetails(null);
 
       expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBe(2); // Should return all bookings
+      expect(result.length).toBe(2);
     });
 
     test("GBD_BD9: undefined bookingId (get all bookings)", async () => {
       const result = await bookingRepo.getBookingDetails(undefined);
 
       expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBe(2); // Should return all bookings
+      expect(result.length).toBe(2);
     });
-
   });
 
   describe("updateBookingStatus - Boundary Testing", () => {
@@ -280,13 +274,13 @@ describe("BookingRepository - Boundary Testing", () => {
     test("UBS_BD1: min- bookingId", async () => {
       const result = await bookingRepo.updateBookingStatus(-1, "confirmed");
 
-      expect(result[0]).toBe(0); // Should return [0] (no rows updated)
+      expect(result[0]).toBe(0);
     });
 
     test("UBS_BD2: min bookingId", async () => {
       const result = await bookingRepo.updateBookingStatus(0, "confirmed");
 
-      expect(result[0]).toBe(0); // Should return [0] (no rows updated)
+      expect(result[0]).toBe(0);
     });
 
     test("UBS_BD3: min+ bookingId", async () => {
@@ -296,14 +290,13 @@ describe("BookingRepository - Boundary Testing", () => {
       expect(result[0]).toBeGreaterThanOrEqual(0);
     });
 
-    test("UBS_BD4: nominal bookingId (existing)", async () => {
+    test("UBS_BD4: nom bookingId", async () => {
       const result = await bookingRepo.updateBookingStatus(
         testBookingId,
         "confirmed"
       );
 
       expect(result[0]).toBe(1);
-
 
       const updatedBooking = await Booking.findByPk(testBookingId);
       expect(updatedBooking.status).toBe("confirmed");
@@ -315,7 +308,7 @@ describe("BookingRepository - Boundary Testing", () => {
         "confirmed"
       );
 
-      expect(result[0]).toBe(0); 
+      expect(result[0]).toBe(0);
     });
 
     test("UBS_BD6: max bookingId", async () => {
@@ -324,7 +317,7 @@ describe("BookingRepository - Boundary Testing", () => {
         "confirmed"
       );
 
-      expect(result[0]).toBe(0); 
+      expect(result[0]).toBe(0);
     });
 
     test("UBS_BD7: max+ bookingId", async () => {
@@ -333,13 +326,13 @@ describe("BookingRepository - Boundary Testing", () => {
         "confirmed"
       );
 
-      expect(result[0]).toBe(0); 
+      expect(result[0]).toBe(0);
     });
 
     test("UBS_BD8: null bookingId", async () => {
       const result = await bookingRepo.updateBookingStatus(null, "confirmed");
 
-      expect(result[0]).toBe(0); 
+      expect(result[0]).toBe(0);
     });
 
     test("UBS_BD9: string bookingId", async () => {
@@ -348,7 +341,7 @@ describe("BookingRepository - Boundary Testing", () => {
         "confirmed"
       );
 
-      expect(result[0]).toBe(0); 
+      expect(result[0]).toBe(0);
     });
 
     test("UBS_BD10: invalid status value", async () => {
@@ -386,7 +379,6 @@ describe("BookingRepository - Boundary Testing", () => {
       ]);
       testUserIds = users.map((u) => u.id);
 
-      
       await Booking.bulkCreate([
         {
           roomId: testRoom.id,
@@ -433,14 +425,13 @@ describe("BookingRepository - Boundary Testing", () => {
       const result = await bookingRepo.getBookingsByUserId(1);
 
       expect(Array.isArray(result)).toBe(true);
-   
     });
 
-    test("GBU_BD4: nominal userId (existing with bookings)", async () => {
+    test("GBU_BD4: nom userId ", async () => {
       const result = await bookingRepo.getBookingsByUserId(testUserIds[0]);
 
       expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBe(2); 
+      expect(result.length).toBe(2);
       expect(result.every((b) => b.userId === testUserIds[0])).toBe(true);
     });
 
@@ -529,7 +520,7 @@ describe("BookingRepository - Boundary Testing", () => {
     test("DB_BD2: min bookingId", async () => {
       const result = await bookingRepo.delete(0);
 
-      expect(result).toBe(0); 
+      expect(result).toBe(0);
     });
 
     test("DB_BD3: min+ bookingId", async () => {
@@ -539,13 +530,12 @@ describe("BookingRepository - Boundary Testing", () => {
       expect(result).toBeGreaterThanOrEqual(0);
     });
 
-    test("DB_BD4: nominal bookingId (existing)", async () => {
+    test("DB_BD4: nom bookingId ", async () => {
       const bookingIdToDelete = testBookingIds[0];
       const result = await bookingRepo.delete(bookingIdToDelete);
 
-      expect(result).toBe(1); 
+      expect(result).toBe(1);
 
-   
       const deletedBooking = await Booking.findByPk(bookingIdToDelete);
       expect(deletedBooking).toBeNull();
     });
@@ -553,37 +543,37 @@ describe("BookingRepository - Boundary Testing", () => {
     test("DB_BD5: max- bookingId", async () => {
       const result = await bookingRepo.delete(2147483646);
 
-      expect(result).toBe(0); 
+      expect(result).toBe(0);
     });
 
     test("DB_BD6: max bookingId", async () => {
       const result = await bookingRepo.delete(2147483647);
 
-      expect(result).toBe(0); 
+      expect(result).toBe(0);
     });
 
     test("DB_BD7: max+ bookingId", async () => {
       const result = await bookingRepo.delete(2147483648);
 
-      expect(result).toBe(0); 
+      expect(result).toBe(0);
     });
 
     test("DB_BD8: null bookingId", async () => {
       const result = await bookingRepo.delete(null);
 
-      expect(result).toBe(0); 
+      expect(result).toBe(0);
     });
 
     test("DB_BD9: string bookingId", async () => {
       const result = await bookingRepo.delete("invalid");
 
-      expect(result).toBe(0); 
+      expect(result).toBe(0);
     });
 
     test("DB_BD10: undefined bookingId", async () => {
       const result = await bookingRepo.delete(undefined);
 
-      expect(result).toBe(0); 
+      expect(result).toBe(0);
     });
   });
 });

@@ -119,7 +119,7 @@ describe("RoomRepository - Unit Testing", () => {
         expect(result.currentPage).toBe(1);
       });
 
-      test("BD7: nominal price", async () => {
+      test("BD7: nom price", async () => {
         const roomData = {
           name: "Standard Room",
           location: "Building B",
@@ -398,7 +398,7 @@ describe("RoomRepository - Unit Testing", () => {
         expect(result).toBeDefined();
       });
 
-      test("GRD_BD4: nominal roomId", async () => {
+      test("GRD_BD4: nom roomId", async () => {
         const result = await roomRepo.getRoomDetails(sampleRoomId);
 
         expect(result).toBeDefined();
@@ -448,7 +448,7 @@ describe("RoomRepository - Unit Testing", () => {
         expect(result.totalPages).toBeGreaterThanOrEqual(0);
       });
 
-      test("GRD_PG4: nominal pageNumber", async () => {
+      test("GRD_PG4: nom pageNumber", async () => {
         await Room.bulkCreate([
           {
             name: "Room 3",
@@ -647,7 +647,7 @@ describe("RoomRepository - Unit Testing", () => {
       expect(result.currentPage).toBeDefined();
     });
 
-    test("DEL_BD4: nominal roomId", async () => {
+    test("DEL_BD4: nom roomId", async () => {
       const roomToDelete = testRoomIds[1];
       const result = await roomRepo.deleteRoom(roomToDelete);
 
@@ -722,7 +722,7 @@ describe("RoomRepository - Unit Testing", () => {
       expect(result.currentPage).toBeDefined();
     });
 
-    test("UPD_BD4: nominal roomId", async () => {
+    test("UPD_BD4: nom roomId", async () => {
       const updateData = {
         name: "Successfully Updated Room",
         location: "New Location",
@@ -829,7 +829,7 @@ describe("RoomRepository - Unit Testing", () => {
       expect(result.every((room) => room.capacity >= 1)).toBe(true);
     });
 
-    test("SRCH_BD4: nominal capacity", async () => {
+    test("SRCH_BD4: nom capacity", async () => {
       const result = await roomRepo.searchRooms({ capacity: 50 });
 
       expect(Array.isArray(result)).toBe(true);
