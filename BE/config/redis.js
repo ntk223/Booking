@@ -2,6 +2,7 @@ import redis from "redis";
 import { env } from "./environment.js";
 import CircuitBreaker from "opossum";
 import logger from "../logger/winston.log.js";
+import { registerCircuitBreaker } from "../utils/metrics.js";
 
 const redisClient = redis.createClient({
   url: `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`,
@@ -63,6 +64,7 @@ class SafeRedisClient {
 
     // Options for Opossum
     const options = {
+      name: 'redis-circuit-breaker', // Name is important for metrics
       timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // If function takes longer than 30s, trigger failure
       errorThresholdPercentage: (env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || 0.5) * 100, // 50%
       resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // Wait 30s before trying again (Half-Open)
@@ -72,6 +74,9 @@ class SafeRedisClient {
     // Create circuit breaker wrapping a generic execution function
     // We pass the actual operation as an argument to fire()
     this.circuitBreaker = new CircuitBreaker(async (operation) => operation(), options);
+
+    // Register with Prometheus
+    registerCircuitBreaker(this.circuitBreaker);
 
     // Listen to circuit breaker events for logging
     this.circuitBreaker.on("open", () => {
@@ -198,4 +203,3 @@ class SafeRedisClient {
 export const rawRedisClient = redisClient;
 export const safeRedisClient = new SafeRedisClient(redisClient);
 export default safeRedisClient;
-

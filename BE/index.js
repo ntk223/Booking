@@ -11,6 +11,7 @@ import safeRedisClient from "./config/redis.js";
 import logger from "./logger/winston.log.js";
 import { requestIdMiddleware } from "./middlewares/requestIdMiddleware.js";
 import { requestLoggerMiddleware } from "./middlewares/requestLoggerMiddleware.js";
+import { getMetrics, getContentType } from "./utils/metrics.js";
 
 const START_SERVER = () => {
   const app = express();
@@ -47,6 +48,16 @@ const START_SERVER = () => {
         redis: redisCircuitStatus,
       },
     });
+  });
+
+  // Prometheus Metrics Endpoint
+  app.get("/metrics", async (req, res) => {
+    try {
+      res.set("Content-Type", getContentType());
+      res.end(await getMetrics());
+    } catch (ex) {
+      res.status(500).end(ex);
+    }
   });
 
   app.use("/api", APIs);
