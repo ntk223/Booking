@@ -170,6 +170,83 @@
   font-weight: bold;
   font-size: 1.25rem;
 }
+
+/* Booking Section */
+.booking-section {
+  margin-bottom: 2rem;
+}
+
+.booking-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.booking-card .ant-card-head {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.booking-card .ant-card-head-title {
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.datetime-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.date-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.time-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.time-input-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.time-input {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.datetime-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.datetime-picker {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  font-size: 14px;
+}
+
+.datetime-picker:hover {
+  border-color: #40a9ff;
+}
+
+.datetime-picker:focus {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
 .btn-book {
   background: linear-gradient(90deg, #ff7eb3, #ff758c);
   color: #fff;
@@ -179,7 +256,7 @@
   transition: all 0.3s ease;
 }
 
-.btn-book:hover {
+.btn-book:hover:not(:disabled) {
   transform: scale(1.05);
   background: linear-gradient(90deg, #ff758c, #ff7eb3);
 }
@@ -188,10 +265,37 @@
   outline: none;
 }
 
+.btn-book:disabled {
+  background: #f5f5f5 !important;
+  color: #bfbfbf !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
 /* Container button */
 .booking-button-container {
   text-align: center;
   margin: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .datetime-container {
+    gap: 1rem;
+  }
+  
+  .time-input-group {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .time-input {
+    min-width: 100%;
+  }
+  
+  .datetime-picker {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
 }
 
 /* Modal */
