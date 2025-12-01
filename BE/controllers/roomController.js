@@ -9,9 +9,9 @@ export class RoomController {
     res.status(StatusCodes.CREATED).json(newRoom);
   });
 
-  getAllRooms = asyncHandler(async (req, res) => {
-    const pageNumber = parseInt(req.query.page);
-    const data = await roomService.getAllRooms(pageNumber);
+  getRooms = asyncHandler(async (req, res) => {
+    const pageNumber = parseInt(req.query.page) || 1;
+    const data = await roomService.getRooms(pageNumber);
     res.status(StatusCodes.OK).json(data);
   });
 

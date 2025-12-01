@@ -9,7 +9,7 @@ class RoomService {
         return roomCreated;
     }
 
-    async getAllRooms(pageNumber) {
+    async getRooms(pageNumber) {
         const key = `room:page:${pageNumber}`;
         return await cacheManager.getOrSet(key, async () => {
             return await roomRepo.getRoomDetails(null, pageNumber);

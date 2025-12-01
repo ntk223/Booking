@@ -16,7 +16,6 @@ class GCPService {
         });
         this.bucketName = process.env.GCP_BUCKET_NAME;
 
-        // Circuit Breaker Options
         const options = {
             name: 'gcs-circuit-breaker',
             timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000,
@@ -25,13 +24,9 @@ class GCPService {
             volumeThreshold: 5,
         };
 
-        // Initialize Circuit Breaker
         this.circuitBreaker = new CircuitBreaker(async (operation) => operation(), options);
-
-        // Register metrics
         registerCircuitBreaker(this.circuitBreaker);
 
-        // Logging
         this.circuitBreaker.on("open", () => logger.error("GCS Circuit Breaker OPEN", { utilService: "GCS" }));
         this.circuitBreaker.on("close", () => logger.info("GCS Circuit Breaker CLOSED", { utilService: "GCS" }));
         this.circuitBreaker.on("halfOpen", () => logger.info("GCS Circuit Breaker HALF-OPEN", { utilService: "GCS" }));

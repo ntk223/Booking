@@ -4,7 +4,7 @@ import rateLimitMiddleware from "../middlewares/rateLimitMiddleware.js";
 import verifyTokenMiddleware from "../middlewares/verifyTokenMiddleware.js";
 const Router = express.Router()
 Router.use(rateLimitMiddleware({ capacity: 20, refillRate: 1 }));
-Router.use(verifyTokenMiddleware);
+
 
 // Public routes
 /**
@@ -23,7 +23,7 @@ Router.use(verifyTokenMiddleware);
  *               items:
  *                 type: object
  */
-Router.get("/", roomController.getAllRooms);
+Router.get("/", roomController.getRooms);
 
 /**
  * @swagger
@@ -69,6 +69,7 @@ Router.get("/:id", roomController.getRoomDetails);
 Router.post("/search", roomController.searchRooms);
 
 // Protected routes
+Router.use(verifyTokenMiddleware);
 
 /**
  * @swagger

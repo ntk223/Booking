@@ -99,19 +99,39 @@ class RoomRepository extends BaseRepository {
         return { room, currentPage };
     }
 
-    /**
-          testCriteria = {
-              "capacity": "50",
-              "districtId": "2",
-              "searchDate": "2024-07-20",
-              "startTime": "10:00",
-              "endTime": "12:00"
-          };
-       */
     async searchRooms(criteria) {
         const { capacity, districtId, searchDate, startTime, endTime } = criteria;
 
         try {
+            const include = [
+                {
+                    model: District,
+                    as: "district",
+                    attributes: ["name"],
+                },
+            ];
+
+            const where = {};
+            if (capacity) where.capacity = { [Op.gte]: capacity };
+            if (districtId) where.districtId = districtId;
+
+            // Only check availability if date and time are provided
+            if (searchDate && startTime && endTime) {
+                const literal = sequelize.literal(`
+                    NOT EXISTS (
+                        SELECT 1
+                        FROM bookings AS b
+                        WHERE b.room_id = \`Room\`.\`id\`
+                        AND b.date = ${sequelize.escape(searchDate)}
+                        AND b.status != 'cancelled'
+                        AND b.start_time < ${sequelize.escape(endTime)}
+                        AND b.end_time > ${sequelize.escape(startTime)}
+                        AND b.deleted_at IS NULL
+                    )
+                `);
+                where[Op.and] = literal;
+            }
+
             const rooms = await this.findAll({
                 attributes: [
                     "id",
@@ -122,53 +142,11 @@ class RoomRepository extends BaseRepository {
                     "imageUrl",
                     [sequelize.literal(`'available'`), "current_status"],
                 ],
-                include: [
-                    {
-                        model: District,
-                        as: "district",
-                        attributes: ["name"],
-                    },
-                    {
-                        model: Booking,
-                        as: "bookings",
-                        required: false, // LEFT JOIN
-                        where: {
-                            date: searchDate,
-                            status: { [Op.ne]: "cancelled" },
-                            [Op.or]: [
-                                {
-                                    [Op.and]: [
-                                        { start_time: { [Op.lt]: endTime } },
-                                        { end_time: { [Op.gt]: startTime } },
-                                    ],
-                                },
-                                {
-                                    [Op.and]: [
-                                        { start_time: { [Op.lt]: startTime } },
-                                        { end_time: { [Op.gt]: endTime } },
-                                    ],
-                                },
-                                {
-                                    [Op.and]: [
-                                        { start_time: { [Op.lte]: startTime } },
-                                        { end_time: { [Op.gte]: endTime } },
-                                    ],
-                                },
-                            ],
-                        },
-                    },
-                ],
-                where: {
-                    capacity: { [Op.gte]: capacity },
-                    district_id: districtId,
-                },
+                include: include,
+                where: where,
             });
 
-            // Lọc lại: loại bỏ phòng có booking trùng giờ
-            const availableRooms = rooms.filter((room) => room.bookings.length === 0);
-
-            // Định dạng kết quả
-            return availableRooms.map((room) => ({
+            return rooms.map((room) => ({
                 id: room.id,
                 name: room.name,
                 location: room.location,
