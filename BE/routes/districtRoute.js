@@ -1,8 +1,10 @@
 import express from "express";
-import { districtController } from "../controllers/districtController.js";
+import { DistrictController } from "../controllers/districtController.js";
+
+const myDistrictController = new DistrictController();
 
 const Router = express.Router();
 
-Router.get("/", districtController.getAllDistricts);
+Router.get("/", myDistrictController.getAllDistricts);
 
 export const districtRoute = Router;

@@ -1,265 +1,57 @@
-import { bookingService } from "../services/bookingService.js";
-import { StatusCodes } from "http-status-codes";
-import logger, { createLogMetadata } from "../logger/winston.log.js";
-class BookingController {
-  async createBooking(req, res) {
-    const startTime = Date.now();
 
+import { StatusCodes } from "http-status-codes";
+import { asyncHandler } from "../utils/asyncHandler.js";
+
+import { BookingDTO } from "../dtos/BookingDTO.js";
+
+export class BookingController {
+  constructor(bookingService) {
+    this.bookingService = bookingService;
+  }
+
+  createBooking = asyncHandler(async (req, res) => {
     try {
       const bookingData = req.body;
-      logger.info(
-        "Creating new booking",
-        createLogMetadata(
-          req,
-          null,
-          null,
-          {
-            userId: bookingData.userId,
-            roomId: bookingData.roomId,
-            startTime: bookingData.startTime,
-            endTime: bookingData.endTime,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      const newBooking = await bookingService.createBooking(bookingData);
-
-      logger.info(
-        "Booking created successfully",
-        createLogMetadata(
-          req,
-          StatusCodes.CREATED,
-          startTime,
-          {
-            bookingId: newBooking.bookingId,
-            userId: bookingData.userId,
-            roomId: bookingData.roomId,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      res.status(StatusCodes.CREATED).json(newBooking);
+      const newBooking = await this.bookingService.createBooking(bookingData);
+      res.status(StatusCodes.CREATED).json(new BookingDTO(newBooking));
     } catch (error) {
-      let statusCode = StatusCodes.BAD_REQUEST;
-
-      // Handle specific error types
       if (
         error.message.includes("already booked") ||
         error.message.includes("Another booking is in progress") ||
         error.message.includes("Missing required fields") ||
-        error.message.includes("End time must be after start time")
+        error.message.includes("End time must be after start time") ||
+        error.message.includes("foreign key constraint")
       ) {
-        res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
-      } else if (error.message.includes("foreign key constraint")) {
-        res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ error: "Invalid room or user ID" });
-      } else {
-        res
-          .status(StatusCodes.INTERNAL_SERVER_ERROR)
-          .json({ error: error.message });
-        statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
-      }
-
-      logger.error(
-        "Failed to create booking",
-        createLogMetadata(
-          req,
-          statusCode,
-          startTime,
-          {
-            error: error.message,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-    }
-  }
-
-  async getAllBookings(req, res) {
-    const startTime = Date.now();
-
-    try {
-      logger.info(
-        "Fetching all bookings",
-        createLogMetadata(req, null, null, {}, "BOOKING_CONTROLLER")
-      );
-
-      const bookings = await bookingService.getAllBookings();
-
-      logger.info(
-        "Successfully retrieved all bookings",
-        createLogMetadata(
-          req,
-          StatusCodes.OK,
-          startTime,
-          {
-            bookingsCount: bookings.length,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      res.status(StatusCodes.OK).json(bookings);
-    } catch (error) {
-      logger.error(
-        "Failed to fetch all bookings",
-        createLogMetadata(
-          req,
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          startTime,
-          {
-            error: error.message,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: error.message });
-    }
-  }
-
-  async getBookingDetails(req, res) {
-    const startTime = Date.now();
-
-    try {
-      const bookingId = req.params.id;
-
-      logger.info(
-        "Fetching booking details",
-        createLogMetadata(
-          req,
-          null,
-          null,
-          {
-            bookingId: bookingId,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      const bookingDetails = await bookingService.getBookingDetails(bookingId);
-
-      logger.info(
-        "Successfully retrieved booking details",
-        createLogMetadata(
-          req,
-          StatusCodes.OK,
-          startTime,
-          {
-            bookingId: bookingId,
-            roomId: bookingDetails.roomId,
-            userId: bookingDetails.userId,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      res.status(StatusCodes.OK).json(bookingDetails);
-    } catch (error) {
-      logger.error(
-        "Failed to fetch booking details",
-        createLogMetadata(
-          req,
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          startTime,
-          {
-            bookingId: req.params.id,
-            error: error.message,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: error.message });
-    }
-  }
-
-  // async deleteBooking(req, res) {
-  //     try {
-  //         const bookingId = req.params.id;
-  //         await bookingService.deleteBooking(bookingId);
-  //         res.status(StatusCodes.NO_CONTENT).send();
-  //     } catch (error) {
-  //         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
-  //     }
-  // }
-
-  async updateBookingStatus(req, res) {
-    const startTime = Date.now();
-
-    try {
-      const bookingId = req.params.id;
-      const { status } = req.body;
-
-      logger.info(
-        "Updating booking status",
-        createLogMetadata(
-          req,
-          null,
-          null,
-          {
-            bookingId: bookingId,
-            newStatus: status,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      await bookingService.updateBookingStatus(bookingId, status);
-
-      logger.info(
-        "Booking status updated successfully",
-        createLogMetadata(
-          req,
-          StatusCodes.OK,
-          startTime,
-          {
-            bookingId: bookingId,
-            newStatus: status,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      res.status(StatusCodes.OK).send();
-    } catch (error) {
-      logger.error(
-        "Failed to update booking status",
-        createLogMetadata(
-          req,
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          startTime,
-          {
-            bookingId: req.params.id,
-            newStatus: req.body.status,
-            error: error.message,
-          },
-          "BOOKING_CONTROLLER"
-        )
-      );
-
-      res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: error.message });
-    }
-    }
-
-    async getBookingsByUser(req, res) {
-        try {
-            const userId = req.params.userId;
-            const bookings = await bookingService.getBookingsByUser(userId);
-            res.status(StatusCodes.OK).json(bookings);
-        } catch (error) {
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        error.statusCode = StatusCodes.BAD_REQUEST;
+        if (error.message.includes("foreign key constraint")) {
+          error.message = "Invalid room or user ID";
         }
+      }
+      throw error;
     }
-}
+  });
 
-export const bookingController = new BookingController();
+  getAllBookings = asyncHandler(async (req, res) => {
+    const bookings = await this.bookingService.getAllBookings();
+    res.status(StatusCodes.OK).json(bookings.map(b => new BookingDTO(b)));
+  });
+
+  getBookingDetails = asyncHandler(async (req, res) => {
+    const bookingId = req.params.id;
+    const bookingDetails = await this.bookingService.getBookingDetails(bookingId);
+    res.status(StatusCodes.OK).json(bookingDetails.map(b => new BookingDTO(b)));
+  });
+
+  updateBookingStatus = asyncHandler(async (req, res) => {
+    const bookingId = req.params.id;
+    const { status } = req.body;
+    await this.bookingService.updateBookingStatus(bookingId, status);
+    res.status(StatusCodes.OK).send();
+  });
+
+  getBookingsByUser = asyncHandler(async (req, res) => {
+    const userId = req.params.userId;
+    const bookings = await this.bookingService.getBookingsByUser(userId);
+    res.status(StatusCodes.OK).json(bookings.map(b => new BookingDTO(b)));
+  });
+}

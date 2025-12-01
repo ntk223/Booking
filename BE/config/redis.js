@@ -1,10 +1,12 @@
 import redis from "redis";
 import { env } from "./environment.js";
-import { CircuitBreaker } from "../utils/CircuitBreaker.js";
+import CircuitBreaker from "opossum";
 import logger from "../logger/winston.log.js";
+import { registerCircuitBreaker } from "../utils/metrics.js";
 
 const redisClient = redis.createClient({
   url: `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`,
+  disableOfflineQueue: true,
   socket: {
     reconnectStrategy: (retries) => {
       if (retries > 10) {
@@ -50,7 +52,7 @@ redisClient.on("ready", () => {
 })();
 
 /**
- * SafeRedisClient - Wraps Redis operations with Circuit Breaker
+ * SafeRedisClient - Wraps Redis operations with Circuit Breaker (Opossum)
  *
  * Provides graceful degradation when Redis is unavailable.
  * - GET operations return null (cache miss)
@@ -61,35 +63,48 @@ class SafeRedisClient {
   constructor(client) {
     this.client = client;
 
-    // Create circuit breaker with configuration from environment
-    this.circuitBreaker = new CircuitBreaker("redis", {
-      failureThreshold: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || 0.5,
-      windowSize: env.CIRCUIT_BREAKER_WINDOW_SIZE || 20,
-      timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000,
-      successThreshold: env.CIRCUIT_BREAKER_SUCCESS_THRESHOLD || 2,
-      minRequestCount: 5,
-    });
+    // Options for Opossum
+    const options = {
+      name: 'redis-circuit-breaker', // Name is important for metrics
+      timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // If function takes longer than 30s, trigger failure
+      errorThresholdPercentage: (env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || 0.5) * 100, // 50%
+      resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // Wait 30s before trying again (Half-Open)
+      volumeThreshold: 5, // minRequestCount
+    };
+
+    // Create circuit breaker wrapping a generic execution function
+    // We pass the actual operation as an argument to fire()
+    this.circuitBreaker = new CircuitBreaker(async (operation) => operation(), options);
+
+    // Register with Prometheus
+    registerCircuitBreaker(this.circuitBreaker);
 
     // Listen to circuit breaker events for logging
-    this.circuitBreaker.on("stateChanged", (event) => {
-      if (event.to === "OPEN") {
-        logger.error(
-          `Redis circuit opened due to high failure rate ` +
-            `(${(event.failureRate * 100).toFixed(
-              1
-            )}%). Entering graceful degradation mode.`,
-          {
-            utilService: "CIRCUIT_BREAKER",
-          }
-        );
-      } else if (event.to === "CLOSED") {
-        logger.info(
-          "Redis circuit closed. Cache operations restored.",
-          {
-            utilService: "CIRCUIT_BREAKER",
-          }
-        );
-      }
+    this.circuitBreaker.on("open", () => {
+      logger.error(
+        `Redis circuit opened. Entering graceful degradation mode.`,
+        {
+          utilService: "CIRCUIT_BREAKER",
+        }
+      );
+    });
+
+    this.circuitBreaker.on("close", () => {
+      logger.info(
+        "Redis circuit closed. Cache operations restored.",
+        {
+          utilService: "CIRCUIT_BREAKER",
+        }
+      );
+    });
+
+    this.circuitBreaker.on("halfOpen", () => {
+      logger.info(
+        "Redis circuit half-open. Testing recovery...",
+        {
+          utilService: "CIRCUIT_BREAKER",
+        }
+      );
     });
   }
 
@@ -98,15 +113,14 @@ class SafeRedisClient {
    */
   async get(key) {
     try {
-      return await this.circuitBreaker.execute(
-        async () => await this.client.get(key),
-        async () => null // Fallback: treat as cache miss
-      );
+      return await this.circuitBreaker.fire(async () => await this.client.get(key));
     } catch (error) {
-      if (error.circuitBreakerOpen) {
+      // If circuit is open or request failed, treat as cache miss
+      if (error.code === 'EOPENBREAKER' || error.type === 'OpenCircuitError') {
         // Circuit is open, gracefully degrade
         return null;
       }
+
       // Log error but don't throw - treat as cache miss
       logger.warn(`GET failed for key "${key}": ${error.message}`, {
         utilService: "REDIS",
@@ -120,12 +134,10 @@ class SafeRedisClient {
    */
   async set(key, value, options) {
     try {
-      return await this.circuitBreaker.execute(
-        async () => await this.client.set(key, value, options),
-        async () => true // Fallback: pretend success (best-effort caching)
-      );
+      await this.circuitBreaker.fire(async () => await this.client.set(key, value, options));
+      return true;
     } catch (error) {
-      if (error.circuitBreakerOpen) {
+      if (error.code === 'EOPENBREAKER' || error.type === 'OpenCircuitError') {
         // Circuit is open, skip caching silently
         return true;
       }
@@ -142,12 +154,10 @@ class SafeRedisClient {
    */
   async del(key) {
     try {
-      return await this.circuitBreaker.execute(
-        async () => await this.client.del(key),
-        async () => true // Fallback: pretend success (best-effort invalidation)
-      );
+      await this.circuitBreaker.fire(async () => await this.client.del(key));
+      return true;
     } catch (error) {
-      if (error.circuitBreakerOpen) {
+      if (error.code === 'EOPENBREAKER' || error.type === 'OpenCircuitError') {
         // Circuit is open, skip invalidation silently
         return true;
       }
@@ -177,7 +187,8 @@ class SafeRedisClient {
    * Get circuit breaker status
    */
   getCircuitStatus() {
-    return this.circuitBreaker.getStatus();
+    // Opossum stats
+    return this.circuitBreaker.stats;
   }
 
   /**

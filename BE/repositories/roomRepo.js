@@ -1,108 +1,138 @@
 import { Room, District, Equipment, Booking, sequelize } from "../models/Model.js";
 import { Op } from "sequelize";
-const PAGE_SIZE = 20;
-class RoomRepository {
+import { BaseRepository } from "./BaseRepository.js";
+
+class RoomRepository extends BaseRepository {
+    constructor() {
+        super(Room);
+    }
+
     async createRoom(roomData) {
-        const totalRooms = await Room.count();
-        const totalRoomsBeforeAtPage = totalRooms % PAGE_SIZE;
-        const currentPage = Math.ceil((totalRooms + 1) / PAGE_SIZE);
-        const roomCreated = await Room.create(roomData);
-        if (totalRoomsBeforeAtPage === 0 && totalRooms !== 0) {
-            // New page created
-            return { roomCreated, currentPage: null };
-        }
+        const { currentPage } = await this.getPageForNewItem();
+        const roomCreated = await this.create(roomData);
         return { roomCreated, currentPage };
     }
 
     async getRoomDetails(roomId = null, pageNumber) {
-        // await new Promise(resolve => setTimeout(resolve, 1000));
-
-
         const query = {
-            attributes: ['id', 'name', 'location', 'capacity', 'imageUrl', 'price', 'districtId'],
+            attributes: [
+                "id",
+                "name",
+                "location",
+                "capacity",
+                "imageUrl",
+                "price",
+                "districtId",
+            ],
             include: [
                 {
                     model: District,
-                    as: 'district',
-                    attributes: ['name'],
+                    as: "district",
+                    attributes: ["name"],
                 },
                 {
                     model: Equipment,
-                    as: 'equipments',
-                    attributes: ['name'],
+                    as: "equipments",
+                    attributes: ["name"],
                     through: { attributes: [] },
                     required: false,
                 },
             ],
-        }
+        };
+
         if (roomId) {
-            query.where = { id: roomId };
+            const room = await this.findById(roomId, query);
+            if (!room) return null;
+            return this._formatRoom(room);
+        } else if (pageNumber) {
+            const { data, currentPage, totalPages } = await this.paginate(
+                pageNumber,
+                query
+            );
+            return {
+                rooms: data.map((room) => this._formatRoom(room)),
+                currentPage,
+                totalPages,
+            };
         }
-        else if (pageNumber) {
-            query.limit = PAGE_SIZE;
-            query.offset = (pageNumber - 1) * PAGE_SIZE;
-        }
+    }
 
-        const rooms = await Room.findAll(query);
-
+    _formatRoom(room) {
         return {
-            rooms: rooms.map(room => ({
-                id: room.id,
-                name: room.name,
-                location: room.location,
-                capacity: room.capacity,
-                imageUrl: room.imageUrl,
-                district: room.district?.name || null,
-                districtId: room.districtId,
-                equipments: room.equipments.map(e => e.name),
-                price: room.price,
-            })),
-            currentPage: pageNumber,
-            totalPages: Math.ceil(await Room.count() / PAGE_SIZE)
+            id: room.id,
+            name: room.name,
+            location: room.location,
+            capacity: room.capacity,
+            imageUrl: room.imageUrl,
+            district: room.district?.name || null,
+            districtId: room.districtId,
+            equipments: room.equipments ? room.equipments.map((e) => e.name) : [],
+            price: room.price,
         };
     }
 
     async deleteRoom(roomId) {
-        const roomBefore = await Room.findAll({
+        const roomBefore = await this.model.findAll({
             where: {
                 id: {
-                    [Op.lt]: roomId
-                }
-            }
-        })
-        const totalPages = Math.ceil(await Room.count() / PAGE_SIZE);
-        const currentPage = Math.ceil((roomBefore.length + 1) / PAGE_SIZE);
-        await Room.destroy({ where: { id: roomId } });
+                    [Op.lt]: roomId,
+                },
+            },
+        });
+        const totalPages = Math.ceil((await this.count()) / this.pageSize);
+        const currentPage = Math.ceil((roomBefore.length + 1) / this.pageSize);
+        await this.delete(roomId);
         return { totalPages, currentPage };
     }
 
     async updateRoom(roomId, updatedData) {
-
-        const roomBefore = await Room.findAll({
+        const roomBefore = await this.model.findAll({
             where: {
                 id: {
-                    [Op.lt]: roomId
-                }
-            }
-        })
-        const currentPage = Math.ceil((roomBefore.length + 1) / PAGE_SIZE);
-        return { room: await Room.update(updatedData, { where: { id: roomId } }), currentPage };
+                    [Op.lt]: roomId,
+                },
+            },
+        });
+        const currentPage = Math.ceil((roomBefore.length + 1) / this.pageSize);
+        await this.update(roomId, updatedData);
+        const room = await this.findById(roomId);
+        return { room, currentPage };
     }
 
-    /**
-        testCriteria = {
-            "capacity": "50",
-            "districtId": "2",
-            "searchDate": "2024-07-20",
-            "startTime": "10:00",
-            "endTime": "12:00"
-        };
-     */
     async searchRooms(criteria) {
         const { capacity, districtId, searchDate, startTime, endTime } = criteria;
 
         try {
-            const rooms = await Room.findAll({
+            const include = [
+                {
+                    model: District,
+                    as: "district",
+                    attributes: ["name"],
+                },
+            ];
+
+            const where = {};
+            if (capacity) where.capacity = { [Op.gte]: capacity };
+            if (districtId) where.districtId = districtId;
+
+            // Only check availability if date and time are provided
+            if (searchDate && startTime && endTime) {
+                const literal = sequelize.literal(`
+                    NOT EXISTS (
+                        SELECT 1
+                        FROM bookings AS b
+                        WHERE b.room_id = \`Room\`.\`id\`
+                        AND b.date = ${sequelize.escape(searchDate)}
+                        AND b.status != 'cancelled'
+                        AND b.start_time < ${sequelize.escape(endTime)}
+                        AND b.end_time > ${sequelize.escape(startTime)}
+                        AND b.deleted_at IS NULL
+                    )
+                `);
+                where[Op.and] = literal;
+            }
+
+            const rooms = await this.findAll({
                 attributes: [
                     "id",
                     "name",
@@ -110,55 +140,13 @@ class RoomRepository {
                     "capacity",
                     "price",
                     "imageUrl",
-                    [sequelize.literal(`'available'`), "current_status"]
+                    [sequelize.literal(`'available'`), "current_status"],
                 ],
-                include: [
-                    {
-                        model: District,
-                        as: "district",
-                        attributes: ["name"],
-                    },
-                    {
-                        model: Booking,
-                        as: "bookings",
-                        required: false, // LEFT JOIN
-                        where: {
-                            date: searchDate,
-                            status: { [Op.ne]: "cancelled" },
-                            [Op.or]: [
-                                {
-                                    [Op.and]: [
-                                        { start_time: { [Op.lt]: endTime } },
-                                        { end_time: { [Op.gt]: startTime } },
-                                    ],
-                                },
-                                {
-                                    [Op.and]: [
-                                        { start_time: { [Op.lt]: startTime } },
-                                        { end_time: { [Op.gt]: endTime } },
-                                    ],
-                                },
-                                {
-                                    [Op.and]: [
-                                        { start_time: { [Op.lte]: startTime } },
-                                        { end_time: { [Op.gte]: endTime } },
-                                    ],
-                                },
-                            ],
-                        },
-                    },
-                ],
-                where: {
-                    capacity: { [Op.gte]: capacity },
-                    district_id: districtId,
-                },
+                include: include,
+                where: where,
             });
 
-            // Lọc lại: loại bỏ phòng có booking trùng giờ
-            const availableRooms = rooms.filter((room) => room.bookings.length === 0);
-
-            // Định dạng kết quả
-            return availableRooms.map((room) => ({
+            return rooms.map((room) => ({
                 id: room.id,
                 name: room.name,
                 location: room.location,
@@ -174,4 +162,5 @@ class RoomRepository {
         }
     }
 }
+export { RoomRepository };
 export const roomRepo = new RoomRepository();
