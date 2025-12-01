@@ -1,22 +1,29 @@
-import { userRepo } from "../repositories/userRepo.js";
+
 
 class UserService {
+    constructor(userRepo) {
+        this.userRepo = userRepo;
+    }
+
     async createUser(userData) {
-        return await userRepo.createUser(userData);
+        return await this.userRepo.createUser(userData);
     }
+
     async getAllUsers() {
-        return await userRepo.getAllUsers();
+        return await this.userRepo.getAllUsers();
     }
+
     async deleteUser(userId) {
-        return await userRepo.deleteUser(userId);
+        return await this.userRepo.deleteUser(userId);
     }
+
     async updateUser(userId, updatedData) {
-        return await userRepo.updateUser(userId, updatedData);
+        return await this.userRepo.updateUser(userId, updatedData);
     }
+
     async login(email, password) {
-        return await userRepo.login(email, password);
+        return await this.userRepo.login(email, password);
     }
-    
 }
 
-export const userService = new UserService();
+export { UserService };

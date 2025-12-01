@@ -1,18 +1,23 @@
 /* eslint-disable no-unused-vars */
 import { StatusCodes } from 'http-status-codes'
+import logger from '../logger/winston.log.js'
 
 export const errorHandlingMiddleware = (err, req, res, next) => {
+  const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR
+  const message = err.message || StatusCodes[statusCode]
 
-  if (!err.statusCode) err.statusCode = StatusCodes.INTERNAL_SERVER_ERROR
+  // Log the error
+  logger.error(`Error: ${statusCode} - ${message}`, {
+    stack: err.stack,
+    path: req.originalUrl,
+    method: req.method,
+  })
 
-  // Tạo ra một biến responseError để kiểm soát những gì muốn trả về
   const responseError = {
-    statusCode: err.statusCode,
-    message: err.message || StatusCodes[err.statusCode],
-    stack: err.stack
+    statusCode,
+    message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   }
-  // console.error(responseError)
 
-
-  res.status(responseError.statusCode).json(responseError)
+  res.status(statusCode).json(responseError)
 }

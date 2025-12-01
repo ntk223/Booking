@@ -1,16 +1,20 @@
 import express from "express";
 import { APIs } from "./routes/index.js";
-// import sequelize from './config/database.js'
+
 import { env } from "./config/environment.js";
 import { errorHandlingMiddleware } from "./middlewares/errorHandlingMiddleware.js";
 import { corsOptions } from "./config/cors.js";
-// import { swaggerDocs } from './config/swagger.js'
+import { swaggerDocs } from './config/swagger.js';
 import cors from "cors";
 import { healthChecker } from "./utils/HealthChecker.js";
 import safeRedisClient from "./config/redis.js";
 import logger from "./logger/winston.log.js";
 import { requestIdMiddleware } from "./middlewares/requestIdMiddleware.js";
-import client from "prom-client";
+import { requestLoggerMiddleware } from "./middlewares/requestLoggerMiddleware.js";
+import { getMetrics, getContentType, httpRequestDurationMicroseconds } from "./utils/metrics.js";
+import { GCPService } from "./services/GCPService.js";
+
+const myGCPService = new GCPService();
 
 const START_SERVER = () => {
   const app = express();
@@ -24,11 +28,18 @@ const START_SERVER = () => {
 
   // Request ID middleware (before other middlewares and routes)
   app.use(requestIdMiddleware);
+  app.use(requestLoggerMiddleware);
 
-  // Prometheus metrics endpoint
-  app.get("/metrics", async (req, res) => {
-    res.set("Content-Type", client.register.contentType);
-    res.end(await client.register.metrics());
+  // Prometheus Latency Middleware
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      httpRequestDurationMicroseconds
+        .labels(req.method, req.route ? req.route.path : req.path, res.statusCode)
+        .observe(duration / 1000); // Convert to seconds
+    });
+    next();
   });
 
   // Health check endpoints (before API routes for fast response)
@@ -50,21 +61,35 @@ const START_SERVER = () => {
   // Circuit breaker status endpoint
   app.get("/health/circuits", (req, res) => {
     const redisCircuitStatus = safeRedisClient.getCircuitStatus();
+    const gcsCircuitStatus = myGCPService.getCircuitStatus();
 
     res.status(200).json({
       timestamp: new Date().toISOString(),
       circuits: {
         redis: redisCircuitStatus,
+        gcs: gcsCircuitStatus,
       },
     });
+  });
+
+  // Prometheus Metrics Endpoint
+  app.get("/metrics", async (req, res) => {
+    try {
+      res.set("Content-Type", getContentType());
+      res.end(await getMetrics());
+    } catch (ex) {
+      res.status(500).end(ex);
+    }
   });
 
   app.use("/api", APIs);
 
   // Xử lý lỗi tập trung trong ứng dụng
   app.use(errorHandlingMiddleware);
+
   // Tài liệu API với Swagger
-  // swaggerDocs (app)
+  swaggerDocs(app);
+
   // Kết nối Database
   const server = app.listen(env.APP_PORT, () => {
     logger.info(`Booking System Server Started`);
