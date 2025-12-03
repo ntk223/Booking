@@ -18,6 +18,11 @@ const myGCPService = new GCPService();
 
 const START_SERVER = () => {
   const app = express();
+
+  // const collectDefaultMetrics = client.collectDefaultMetrics;
+  // const prefix = "booking_app_";
+  // collectDefaultMetrics({ prefix: prefix });
+
   app.use(cors(corsOptions));
   app.use(express.json());
 

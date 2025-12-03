@@ -79,12 +79,15 @@ const RoomsList = () => {
                       <p>
                         <strong>Thiết bị:</strong>
                       </p>
-                      {room.equipments
-                        .map((eq, i) => (
+                      {room.equipments.map((eq, i) =>
+                        eq ? (
                           <Tag color="blue" key={i}>
                             {eq.trim()}
                           </Tag>
-                        ))}
+                        ) : (
+                          ""
+                        )
+                      )}
                     </>
                   }
                 />
@@ -101,7 +104,7 @@ const RoomsList = () => {
             onChange={(page) => {
               setPageNumber(page);
               setLoading(true);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }}
             showSizeChanger={false}
             showQuickJumper
