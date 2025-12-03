@@ -1,4 +1,3 @@
-
 import { StatusCodes } from "http-status-codes";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -18,15 +17,23 @@ export class RoomController {
   getRooms = asyncHandler(async (req, res) => {
     const pageNumber = parseInt(req.query.page) || 1;
     const data = await this.roomService.getRooms(pageNumber);
+    if (!data) {
+      res.status(StatusCodes.NOT_FOUND).json({ message: "Room not found" });
+      return;
+    }
     res.status(StatusCodes.OK).json({
       ...data,
-      rooms: data.rooms.map(room => new RoomDTO(room))
+      rooms: data.rooms.map((room) => new RoomDTO(room)),
     });
   });
 
   deleteRoom = asyncHandler(async (req, res) => {
     const roomId = req.params.id;
-    await this.roomService.deleteRoom(roomId);
+    const isDone = await this.roomService.deleteRoom(roomId);
+    if (!isDone) {
+      res.status(StatusCodes.NOT_FOUND).json({ message: "Room not found" });
+      return;
+    }
     res.status(StatusCodes.NO_CONTENT).send();
   });
 
@@ -34,18 +41,26 @@ export class RoomController {
     const roomId = req.params.id;
     const updatedData = req.body;
     const room = await this.roomService.updateRoom(roomId, updatedData);
+    if (!room) {
+      res.status(StatusCodes.NOT_FOUND).json({ message: "Room not found" });
+      return;
+    }
     res.status(StatusCodes.OK).json(new RoomDTO(room));
   });
 
   getRoomDetails = asyncHandler(async (req, res) => {
     const roomId = req.params.id;
     const roomDetails = await this.roomService.getRoomDetails(roomId);
+    if (!roomDetails) {
+      res.status(StatusCodes.NOT_FOUND).json({ message: "Room not found" });
+      return;
+    }
     res.status(StatusCodes.OK).json(new RoomDTO(roomDetails));
   });
 
   searchRooms = asyncHandler(async (req, res) => {
     const criteria = req.body;
     const rooms = await this.roomService.searchRooms(criteria);
-    res.status(StatusCodes.OK).json(rooms.map(room => new RoomDTO(room)));
+    res.status(StatusCodes.OK).json(rooms.map((room) => new RoomDTO(room)));
   });
 }

@@ -5,6 +5,7 @@ class CacheManager {
     constructor() {
         this.client = safeRedisClient;
         this.defaultTTL = 3600; // 1 hour
+        this.notFoundTTL = 60; // 1 minute
     }
 
     /**
@@ -68,19 +69,31 @@ class CacheManager {
      * @param {string} key
      * @param {Function} fetchFn
      * @param {number} ttl
+     * @param {number} notFoundTtl
      * @returns {Promise<any>}
      */
-    async getOrSet(key, fetchFn, ttl = this.defaultTTL) {
+    async getOrSet(key, fetchFn, ttl = this.defaultTTL, notFoundTtl = this.notFoundTTL) {
         const cachedData = await this.get(key);
-        if (cachedData) {
+        if (cachedData !== null) {
+            if (cachedData === 'NOT_FOUND') {
+                return null;
+            }
             return cachedData;
         }
 
-        const data = await fetchFn();
-        if (data) {
+        try {
+            const data = await fetchFn();
+            if (data === null || data === undefined) {
+                await this.set(key, 'NOT_FOUND', notFoundTtl);
+                return null;
+            }
+
             await this.set(key, data, ttl);
+            return data;
+        } catch(error) {
+            logger.error(`Error in getOrSet for key ${key}: ${error.message}`);
+            return null;
         }
-        return data;
     }
 }
 
