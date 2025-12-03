@@ -1,0 +1,228 @@
+2025-11-30 23:23:46.575 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-11-30 23:23:46.579 [ERROR] Unable to connect to the database:
+2025-11-30 23:24:09.250 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-11-30 23:24:09.255 [ERROR] Unable to connect to the database:
+2025-11-30 23:45:24.420 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-11-30 23:45:24.424 [ERROR] Unable to connect to the database:
+2025-11-30 23:52:36.200 [ERROR] [CONTROLLER] [beecec73-5742-4967-a77c-284db16ff709] ::1 [POST] /api/rooms 1764521556191ms 500 Failed to create room {"payload":{"error":"Incorrect integer value: 'string' for column 'district_id' at row 1"}}
+2025-11-30 23:53:00.270 [ERROR] [CONTROLLER] [bc687e54-f58f-4f83-a3be-b983e50db4e7] ::1 [POST] /api/rooms 1764521580243ms 500 Failed to create room {"payload":{"error":"Cannot add or update a child row: a foreign key constraint fails (`meetingroombooking`.`rooms`, CONSTRAINT `rooms_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`) ON DELETE SET NULL)"}}
+2025-12-01 03:05:27.739 [ERROR] [GET] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:38:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-12-01 03:05:27.743 [ERROR] Response: GET /api/rooms?page=1 401 10ms
+2025-12-01 03:05:30.120 [ERROR] [GET] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:53:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-12-01 03:05:30.121 [ERROR] Response: GET /api/rooms/999999 401 4ms
+2025-12-01 03:11:10.411 [ERROR] [GET] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:53:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-12-01 03:11:10.415 [ERROR] Response: GET /api/rooms?page=1 401 7ms
+2025-12-01 03:11:11.963 [ERROR] [GET] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:53:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-12-01 03:11:11.964 [ERROR] Response: GET /api/rooms/999999 401 4ms
+2025-12-01 03:14:27.733 [ERROR] [GET] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:53:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-12-01 03:14:27.736 [ERROR] Response: GET /api/rooms?page=1 401 7ms
+2025-12-01 03:14:29.283 [ERROR] [GET] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:53:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-12-01 03:14:29.284 [ERROR] Response: GET /api/rooms/999999 401 4ms
+2025-12-01 03:14:31.479 [ERROR] [GET] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:53:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-12-01 03:14:31.481 [ERROR] Response: GET /api/rooms/1 401 4ms
+2025-12-01 03:24:24.045 [ERROR] [POST] Error: 400 - Expected property name or '}' in JSON at position 1 (line 1 column 2)
+SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at parse (E:\Code\Booking\BE\node_modules\body-parser\lib\types\json.js:92:19)
+    at E:\Code\Booking\BE\node_modules\body-parser\lib\read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    at invokeCallback (E:\Code\Booking\BE\node_modules\raw-body\index.js:238:16)
+    at done (E:\Code\Booking\BE\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (E:\Code\Booking\BE\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:518:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+2025-12-01 10:32:57.529 [ERROR] Unable to connect to the database:
+2025-12-01 10:34:39.453 [ERROR] [REDIS] Redis error: Socket closed unexpectedly
+2025-12-01 10:34:39.456 [ERROR] [REDIS] Redis error: Socket closed unexpectedly
+2025-12-01 10:38:06.831 [ERROR] [GET] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:38:16
+2025-12-01 10:41:55.353 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:55.376 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:55.441 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:55.548 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:55.703 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:55.908 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:56.172 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:56.482 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:56.838 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:57.241 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:57.694 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:58.196 [ERROR] [REDIS] Redis max retries exceeded
+2025-12-01 10:41:58.196 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:41:58.197 [ERROR] [REDIS] Redis connection failed: Redis max retries exceeded
+2025-12-01 10:49:05.781 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:05.805 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:05.871 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:05.981 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:06.137 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:06.338 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:06.606 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:06.918 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:07.273 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:07.676 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:08.139 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:08.653 [ERROR] [REDIS] Redis max retries exceeded
+2025-12-01 10:49:08.654 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 10:49:08.654 [ERROR] [REDIS] Redis connection failed: Redis max retries exceeded
+2025-12-01 10:50:53.321 [ERROR] [CIRCUIT_BREAKER] Redis circuit opened. Entering graceful degradation mode.
+2025-12-01 10:56:35.402 [ERROR] [CIRCUIT_BREAKER] Redis circuit opened. Entering graceful degradation mode.
+2025-12-01 10:56:59.355 [ERROR] [CIRCUIT_BREAKER] Redis circuit opened. Entering graceful degradation mode.
+2025-12-01 11:14:13.410 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:13.435 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:13.499 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:13.607 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:13.762 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:13.964 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:14.216 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:14.530 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:14.891 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:15.299 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:15.764 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:16.274 [ERROR] [REDIS] Redis max retries exceeded
+2025-12-01 11:14:16.274 [ERROR] [REDIS] Redis error: connect ECONNREFUSED 127.0.0.1:6379
+2025-12-01 11:14:16.275 [ERROR] [REDIS] Redis connection failed: Redis max retries exceeded
+2025-12-01 11:16:34.951 [ERROR] [CIRCUIT_BREAKER] Redis circuit opened. Entering graceful degradation mode.
+2025-12-01 11:16:44.968 [ERROR] [CIRCUIT_BREAKER] Redis circuit opened. Entering graceful degradation mode.
+2025-12-01 11:16:50.922 [ERROR] [CIRCUIT_BREAKER] Redis circuit opened. Entering graceful degradation mode.
+2025-12-01 11:16:50.927 [ERROR] [POST] Error: 500 - Email already in use.
+Error: Email already in use.
+    at UserRepository.createUser (file:///E:/Code/Booking/BE/repositories/userRepo.js:17:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async UserService.createUser (file:///E:/Code/Booking/BE/services/userService.js:5:16)
+    at async file:///E:/Code/Booking/BE/controllers/userController.js:44:18
+2025-12-01 11:16:50.930 [ERROR] [API_RESPONSE] [79a8c9ca-7a41-4983-bfae-cfe370cd15c5] ::1 [POST] /api/auth/register 10ms 500 Response: POST /api/auth/register 500 10ms {"payload":{}}
+2025-12-01 11:16:51.467 [ERROR] [POST] Error: 500 - Email already in use.
+Error: Email already in use.
+    at UserRepository.createUser (file:///E:/Code/Booking/BE/repositories/userRepo.js:17:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async UserService.createUser (file:///E:/Code/Booking/BE/services/userService.js:5:16)
+    at async file:///E:/Code/Booking/BE/controllers/userController.js:44:18
+2025-12-01 11:16:51.468 [ERROR] [API_RESPONSE] [327b7221-abfb-472b-ae65-5311c7cfae13] ::1 [POST] /api/auth/register 6ms 500 Response: POST /api/auth/register 500 6ms {"payload":{}}
+2025-12-01 11:16:51.972 [ERROR] [POST] Error: 500 - Email already in use.
+Error: Email already in use.
+    at UserRepository.createUser (file:///E:/Code/Booking/BE/repositories/userRepo.js:17:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async UserService.createUser (file:///E:/Code/Booking/BE/services/userService.js:5:16)
+    at async file:///E:/Code/Booking/BE/controllers/userController.js:44:18
+2025-12-01 11:16:51.973 [ERROR] [API_RESPONSE] [cc867254-84df-4900-bf10-7aeaabeab400] ::1 [POST] /api/auth/register 4ms 500 Response: POST /api/auth/register 500 4ms {"payload":{}}
+2025-12-01 11:16:58.767 [ERROR] [CIRCUIT_BREAKER] Redis circuit opened. Entering graceful degradation mode.
+2025-12-01 11:16:58.768 [ERROR] [GET] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:38:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-12-01 11:16:58.769 [ERROR] [API_RESPONSE] [a87e2d74-65a8-4a40-aa1a-549de4b83ede] ::1 [GET] /api/rooms 2ms 401 Response: GET /api/rooms 401 2ms {"payload":{}}
+2025-12-01 11:17:14.441 [ERROR] [CIRCUIT_BREAKER] Redis circuit opened. Entering graceful degradation mode.
+2025-12-01 11:17:29.562 [ERROR] [CIRCUIT_BREAKER] Redis circuit opened. Entering graceful degradation mode.
+2025-12-01 11:24:52.491 [ERROR] [POST] Error: 500 - WHERE parameter "date" has invalid "undefined" value
+Error: WHERE parameter "date" has invalid "undefined" value
+    at MySQLQueryGenerator.whereItemQuery (E:\Code\Booking\BE\node_modules\sequelize\lib\dialects\abstract\query-generator.js:1746:13)
+    at E:\Code\Booking\BE\node_modules\sequelize\lib\dialects\abstract\query-generator.js:1737:25
+    at Array.forEach (<anonymous>)
+    at MySQLQueryGenerator.whereItemsQuery (E:\Code\Booking\BE\node_modules\sequelize\lib\dialects\abstract\query-generator.js:1735:35)
+    at E:\Code\Booking\BE\node_modules\sequelize\lib\dialects\abstract\query-generator.js:1843:30
+    at Array.map (<anonymous>)
+    at MySQLQueryGenerator._whereGroupBind (E:\Code\Booking\BE\node_modules\sequelize\lib\dialects\abstract\query-generator.js:1842:21)
+    at MySQLQueryGenerator.whereItemQuery (E:\Code\Booking\BE\node_modules\sequelize\lib\dialects\abstract\query-generator.js:1793:19)
+    at E:\Code\Booking\BE\node_modules\sequelize\lib\dialects\abstract\query-generator.js:1737:25
+    at Array.forEach (<anonymous>)
+2025-12-01 11:24:52.492 [ERROR] [API_RESPONSE] [c80a889e-febc-4111-91c7-971d8e0f154f] ::1 [POST] /api/rooms/search 12ms 500 Response: POST /api/rooms/search 500 12ms {"payload":{}}
+2025-12-01 11:56:17.457 [ERROR] [POST] Error: 400 - Expected property name or '}' in JSON at position 1 (line 1 column 2)
+SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at parse (E:\Code\Booking\BE\node_modules\body-parser\lib\types\json.js:92:19)
+    at E:\Code\Booking\BE\node_modules\body-parser\lib\read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    at invokeCallback (E:\Code\Booking\BE\node_modules\raw-body\index.js:238:16)
+    at done (E:\Code\Booking\BE\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (E:\Code\Booking\BE\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:518:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+2025-12-01 12:03:03.366 [ERROR] [POST] Error: 401 - No token provided
+ApiError: No token provided
+    at verifyTokenMiddleware (file:///E:/Code/Booking/BE/middlewares/verifyTokenMiddleware.js:8:21)
+    at Layer.handle [as handle_request] (E:\Code\Booking\BE\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:328:13)
+    at E:\Code\Booking\BE\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:346:12)
+    at next (E:\Code\Booking\BE\node_modules\express\lib\router\index.js:280:10)
+    at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:53:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-12-01 12:03:03.368 [ERROR] [API_RESPONSE] [ad41e26e-ac6e-47b9-85dc-76654baef3be] ::1 [POST] /api/rooms/search 8ms 401 Response: POST /api/rooms/search 401 8ms {"payload":{}}

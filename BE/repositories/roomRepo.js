@@ -115,21 +115,21 @@ class RoomRepository extends BaseRepository {
             if (capacity) where.capacity = { [Op.gte]: capacity };
             if (districtId) where.districtId = districtId;
 
-            // Only check availability if date and time are provided
             if (searchDate && startTime && endTime) {
-                const literal = sequelize.literal(`
-                    NOT EXISTS (
-                        SELECT 1
-                        FROM bookings AS b
-                        WHERE b.room_id = \`Room\`.\`id\`
-                        AND b.date = ${sequelize.escape(searchDate)}
-                        AND b.status != 'cancelled'
-                        AND b.start_time < ${sequelize.escape(endTime)}
-                        AND b.end_time > ${sequelize.escape(startTime)}
-                        AND b.deleted_at IS NULL
-                    )
-                `);
-                where[Op.and] = literal;
+                include.push({
+                    model: Booking,
+                    as: "bookings",
+                    required: false,
+                    where: {
+                        date: searchDate,
+                        status: { [Op.ne]: "cancelled" },
+                        [Op.and]: [
+                            { startTime: { [Op.lt]: endTime } },
+                            { endTime: { [Op.gt]: startTime } },
+                        ],
+                    },
+                });
+                where["$bookings.id$"] = null;
             }
 
             const rooms = await this.findAll({
