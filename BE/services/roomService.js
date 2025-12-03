@@ -21,6 +21,7 @@ class RoomService {
     }
 
     async deleteRoom(roomId) {
+        if (!this._isValidRoomId(roomId)) return null;
         const { totalPages, currentPage } = await this.roomRepo.deleteRoom(roomId);
         // Invalidate all pages to be safe and simple
         await this.cacheManager.delPattern('room:page:*');
@@ -29,6 +30,7 @@ class RoomService {
     }
 
     async updateRoom(roomId, updatedData) {
+        if (!this._isValidRoomId(roomId)) return null;
         const { room, currentPage } = await this.roomRepo.updateRoom(roomId, updatedData);
         await this.cacheManager.delPattern('room:page:*');
         await this.cacheManager.del(`room:${roomId}`);
@@ -36,6 +38,7 @@ class RoomService {
     }
 
     async getRoomDetails(roomId) {
+        if (!this._isValidRoomId(roomId)) return null;
         const key = `room:${roomId}`;
         return await this.cacheManager.getOrSet(key, async () => {
             return await this.roomRepo.getRoomDetails(roomId);
@@ -44,6 +47,11 @@ class RoomService {
 
     async searchRooms(criteria) {
         return await this.roomRepo.searchRooms(criteria);
+    }
+
+    _isValidRoomId(roomId) {
+        return roomId > 0;
+        // return true;
     }
 }
 
