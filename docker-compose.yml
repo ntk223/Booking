@@ -42,6 +42,38 @@ services:
       timeout: 3s
       retries: 5
 
+  # MySQL Exporter for Prometheus
+  mysql-exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: booking_mysql_exporter
+    restart: unless-stopped
+    ports:
+      - "9104:9104"
+    volumes:
+      - "./.my.cnf:/.my.cnf:ro"
+    command:
+      - "--config.my-cnf=/.my.cnf"
+    networks:
+      - booking_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # Redis Exporter for Prometheus
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: booking_redis_exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    environment:
+      REDIS_ADDR: "redis://booking_redis:6379"
+    networks:
+      - booking_network
+    depends_on:
+      redis:
+        condition: service_healthy
+
   grafana:
     image: grafana/grafana-oss:latest
     container_name: booking_grafana
