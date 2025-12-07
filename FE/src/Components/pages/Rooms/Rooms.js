@@ -54,6 +54,7 @@ const RoomsList = () => {
                   <img
                     alt={room.name}
                     src={room.imageUrl}
+                    loading="lazy"
                     style={{
                       height: 180,
                       objectFit: "cover",
