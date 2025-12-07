@@ -2,10 +2,11 @@ import { Op } from "sequelize";
 import { Booking } from "../models/Model.js";
 
 class BookingService {
-    constructor(bookingRepo, redisClient, sequelize) {
+    constructor(bookingRepo, redisClient, sequelize, cacheManager) {
         this.bookingRepo = bookingRepo;
         this.redisClient = redisClient;
         this.sequelize = sequelize;
+        this.cacheManager = cacheManager;
     }
 
     async queueBooking(bookingData) {
@@ -59,7 +60,12 @@ class BookingService {
                     throw new Error("Room is already booked for the selected time slot.");
                 }
 
-                return await this.bookingRepo.createBooking(bookingData, t);
+                const newBooking = await this.bookingRepo.createBooking(bookingData, t);
+
+                // Invalidate User History Cache
+                await this.cacheManager.del(`bookings:user:${bookingData.userId}`);
+
+                return newBooking;
             });
         } catch (error) {
             throw error;
@@ -79,8 +85,8 @@ class BookingService {
         }
     }
 
-    async getAllBookings() {
-        return await this.bookingRepo.getBookingDetails();
+    async getAllBookings(page = 1) {
+        return await this.bookingRepo.getBookingDetails(null, page);
     }
 
     async deleteBooking(bookingId) {
@@ -88,7 +94,20 @@ class BookingService {
     }
 
     async updateBookingStatus(bookingId, status) {
-        return await this.bookingRepo.updateBookingStatus(bookingId, status);
+        const result = await this.bookingRepo.updateBookingStatus(bookingId, status);
+        // We need userId to invalidate cache. 
+        // Ideally we should fetch booking first, but that adds overhead.
+        // Alternatively, we can clear ALL user caches? No.
+        // Let's fetch the booking briefly to get userId.
+        try {
+            const booking = await this.bookingRepo.findById(bookingId);
+            if (booking) {
+                await this.cacheManager.del(`bookings:user:${booking.userId}`);
+            }
+        } catch (err) {
+            console.error("Failed to invalidate cache", err);
+        }
+        return result;
     }
 
     async getBookingDetails(bookingId) {
@@ -96,7 +115,11 @@ class BookingService {
     }
 
     async getBookingsByUser(userId) {
-        return await this.bookingRepo.getBookingsByUserId(userId);
+        // Cache key: bookings:user:{userId}
+        const key = `bookings:user:${userId}`;
+        return await this.cacheManager.getOrSet(key, async () => {
+            return await this.bookingRepo.getBookingsByUserId(userId);
+        }, 300); // 5 minutes TTL
     }
 }
 

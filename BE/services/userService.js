@@ -9,8 +9,8 @@ class UserService {
         return await this.userRepo.createUser(userData);
     }
 
-    async getAllUsers() {
-        return await this.userRepo.getAllUsers();
+    async getAllUsers(page = 1) {
+        return await this.userRepo.getAllUsers(page);
     }
 
     async deleteUser(userId) {

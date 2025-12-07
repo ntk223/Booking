@@ -32,8 +32,13 @@ export class BookingController {
   });
 
   getAllBookings = asyncHandler(async (req, res) => {
-    const bookings = await this.bookingService.getAllBookings();
-    res.status(StatusCodes.OK).json(bookings.map(b => new BookingDTO(b)));
+    const page = parseInt(req.query.page) || 1;
+    const data = await this.bookingService.getAllBookings(page);
+    res.status(StatusCodes.OK).json({
+      bookings: data.bookings.map(b => new BookingDTO(b)),
+      currentPage: data.currentPage,
+      totalPages: data.totalPages
+    });
   });
 
   getBookingDetails = asyncHandler(async (req, res) => {

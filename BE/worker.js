@@ -5,7 +5,8 @@ import { bookingRepo } from "./repositories/bookingRepo.js";
 import sequelize from "./config/database.js";
 import logger from "./logger/winston.log.js";
 
-const bookingService = new BookingService(bookingRepo, rawRedisClient, sequelize);
+import { cacheManager } from "./utils/CacheManager.js";
+const bookingService = new BookingService(bookingRepo, rawRedisClient, sequelize, cacheManager);
 
 const QUEUE_KEY = "booking:queue";
 const PROCESSING_TIMEOUT = 1000;
