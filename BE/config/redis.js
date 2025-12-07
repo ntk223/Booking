@@ -61,11 +61,11 @@ class SafeRedisClient {
     // Options for Opossum
     const options = {
       name: 'redis-circuit-breaker', // Name is important for metrics
-      timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // If function takes longer than 30s, trigger failure
-      errorThresholdPercentage: (env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || 0.5) * 100, // 50%
-      resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // Wait 30s before trying again (Half-Open)
-      volumeThreshold: 2, // minRequestCount - Lowered to 2 for faster reaction in Cluster mode
-      rollingCountTimeout: 60000, // 1 minute window (prevents "amnesia" during slow timeouts)
+      timeout: env.CIRCUIT_BREAKER_TIMEOUT, // If function takes longer than this, trigger failure
+      errorThresholdPercentage: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD * 100,
+      resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT, // Wait before trying again (Half-Open)
+      volumeThreshold: env.CIRCUIT_BREAKER_VOLUME_THRESHOLD, // Minimum requests before circuit can open
+      rollingCountTimeout: env.CIRCUIT_BREAKER_ROLLING_COUNT_TIMEOUT, // Rolling window for failure rate calculation
     };
 
     // Create circuit breaker wrapping a generic execution function

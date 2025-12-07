@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { Booking } from "../models/Model.js";
+import logger from "../logger/winston.log.js";
 
 class BookingService {
     constructor(bookingRepo, redisClient, sequelize, cacheManager) {
@@ -79,7 +80,12 @@ class BookingService {
                         await this.redisClient.del(lockKey);
                     }
                 } catch (err) {
-                    console.error('[ERROR] Failed to release Redis lock:', err.message);
+                    logger.error('Failed to release Redis lock', {
+                        error: err.message,
+                        lockKey,
+                        lockValue,
+                        utilService: 'BOOKING_SERVICE'
+                    });
                 }
             }
         }
@@ -103,9 +109,25 @@ class BookingService {
             const booking = await this.bookingRepo.findById(bookingId);
             if (booking) {
                 await this.cacheManager.del(`bookings:user:${booking.userId}`);
+                logger.info('Cache invalidated after booking status update', {
+                    bookingId,
+                    userId: booking.userId,
+                    newStatus: status,
+                    utilService: 'BOOKING_SERVICE'
+                });
+            } else {
+                logger.warn('Booking not found for cache invalidation', {
+                    bookingId,
+                    utilService: 'BOOKING_SERVICE'
+                });
             }
         } catch (err) {
-            console.error("Failed to invalidate cache", err);
+            logger.error('Failed to invalidate cache after booking status update', {
+                error: err.message,
+                bookingId,
+                status,
+                utilService: 'BOOKING_SERVICE'
+            });
         }
         return result;
     }

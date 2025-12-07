@@ -2,6 +2,7 @@ import cluster from 'cluster';
 import os from 'os';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import logger from './logger/winston.log.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,30 +12,41 @@ const numCPUs = os.cpus().length;
 const numWorkers = parseInt(process.env.CLUSTER_WORKERS) || numCPUs;
 
 if (cluster.isPrimary) {
-    console.log(` Primary process ${process.pid} starting...`);
-    console.log(` System has ${numCPUs} CPU cores`);
-    console.log(` Starting ${numWorkers} worker processes...\n`);
+    logger.info('Primary process starting', {
+        pid: process.pid,
+        cpuCores: numCPUs,
+        workerCount: numWorkers,
+        utilService: 'CLUSTER'
+    });
 
     for (let i = 0; i < numWorkers; i++) {
         cluster.fork();
     }
 
     cluster.on('exit', (worker, code, signal) => {
-        console.log(` Worker ${worker.process.pid} died (code: ${code}, signal: ${signal})`);
-        console.log(' Starting a new worker...');
+        logger.error('Worker process died', {
+            pid: worker.process.pid,
+            exitCode: code,
+            signal: signal,
+            utilService: 'CLUSTER'
+        });
+        logger.info('Starting replacement worker', { utilService: 'CLUSTER' });
         cluster.fork();
     });
 
     cluster.on('online', (worker) => {
-        console.log(` Worker ${worker.process.pid} is online`);
+        logger.info('Worker process online', {
+            pid: worker.process.pid,
+            utilService: 'CLUSTER'
+        });
     });
     const shutdown = () => {
-        console.log('\n Received shutdown signal, stopping workers...');
+        logger.info('Received shutdown signal, stopping workers', { utilService: 'CLUSTER' });
         for (const id in cluster.workers) {
             cluster.workers[id].kill('SIGTERM');
         }
         setTimeout(() => {
-            console.log(' All workers stopped. Goodbye!');
+            logger.info('All workers stopped gracefully', { utilService: 'CLUSTER' });
             process.exit(0);
         }, 5000);
     };
@@ -43,6 +55,9 @@ if (cluster.isPrimary) {
     process.on('SIGINT', shutdown);
 
 } else {
-    console.log(`check Worker ${process.pid} starting server...`);
+    logger.info('Worker starting server', {
+        pid: process.pid,
+        utilService: 'CLUSTER'
+    });
     import('./index.js');
 }

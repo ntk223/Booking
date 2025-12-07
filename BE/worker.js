@@ -1,5 +1,5 @@
 
-import { rawRedisClient } from "./config/redis.js";
+import { rawRedisClient, safeRedisClient } from "./config/redis.js";
 import { BookingService } from "./services/bookingService.js";
 import { bookingRepo } from "./repositories/bookingRepo.js";
 import sequelize from "./config/database.js";
@@ -16,6 +16,8 @@ async function processQueue() {
 
     while (true) {
         try {
+            // Use rawRedisClient for queue operations (blocking pop)
+            // Note: brPop is critical for queue processing, but we handle errors gracefully
             const result = await rawRedisClient.brPop(QUEUE_KEY, 5);
 
             if (result) {
@@ -33,10 +35,12 @@ async function processQueue() {
                 }
             }
         } catch (err) {
+            // Handle Redis connection errors gracefully
             if (err.message && !err.message.includes("Socket closed")) {
                 logger.error(`Worker Error: ${err.message}`);
             }
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Wait before retrying to avoid hammering Redis during failures
+            await new Promise(resolve => setTimeout(resolve, 5000));
         }
     }
 }
