@@ -8,6 +8,8 @@
     "server": "nodemon index.js",
     "server:monitored": "nodemon index-monitored.js",
     "dev": "npm-run-all --parallel server",
+    "start": "node index.js",
+    "start:cluster": "node cluster.js",
     "seed": "node benchmark/seed-database.js",
     "benchmark": "node benchmark/run-benchmarks.js",
     "benchmark:race": "node benchmark/race-condition-test.js",
@@ -27,6 +29,7 @@
   "dependencies": {
     "@faker-js/faker": "^9.2.0",
     "@google-cloud/storage": "^7.17.3",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
