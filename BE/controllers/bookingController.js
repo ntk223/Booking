@@ -12,8 +12,8 @@ export class BookingController {
   createBooking = asyncHandler(async (req, res) => {
     try {
       const bookingData = req.body;
-      const newBooking = await this.bookingService.createBooking(bookingData);
-      res.status(StatusCodes.CREATED).json(new BookingDTO(newBooking));
+      await this.bookingService.queueBooking(bookingData);
+      res.status(StatusCodes.ACCEPTED).json({ message: "Booking request received", status: "processing" });
     } catch (error) {
       if (
         error.message.includes("already booked") ||

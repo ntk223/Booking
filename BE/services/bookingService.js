@@ -8,7 +8,14 @@ class BookingService {
         this.sequelize = sequelize;
     }
 
-    async createBooking(bookingData) {
+    async queueBooking(bookingData) {
+        // Push booking data to Redis Queue
+        const QUEUE_KEY = "booking:queue";
+        await this.redisClient.lPush(QUEUE_KEY, JSON.stringify(bookingData));
+        return true;
+    }
+
+    async processBookingRequest(bookingData) {
         // Create distributed lock key
         const lockKey = `booking:lock:${bookingData.roomId}:${bookingData.date}:${bookingData.startTime}`;
         const lockValue = `${Date.now()}-${Math.random()}`;
