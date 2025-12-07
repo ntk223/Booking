@@ -9,13 +9,8 @@ const redisClient = redis.createClient({
   disableOfflineQueue: true,
   socket: {
     reconnectStrategy: (retries) => {
-      if (retries > 10) {
-        logger.error("Redis max retries exceeded", {
-          utilService: "REDIS",
-        });
-        return new Error("Redis max retries exceeded");
-      }
-      return Math.min(retries * 50, 500);
+      // Infinite retries: Wait 50ms, 100ms, ... up to max 3000ms (3s)
+      return Math.min(retries * 50, 3000);
     },
   },
 });
@@ -69,7 +64,8 @@ class SafeRedisClient {
       timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // If function takes longer than 30s, trigger failure
       errorThresholdPercentage: (env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || 0.5) * 100, // 50%
       resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // Wait 30s before trying again (Half-Open)
-      volumeThreshold: 5, // minRequestCount
+      volumeThreshold: 2, // minRequestCount - Lowered to 2 for faster reaction in Cluster mode
+      rollingCountTimeout: 60000, // 1 minute window (prevents "amnesia" during slow timeouts)
     };
 
     // Create circuit breaker wrapping a generic execution function
@@ -106,6 +102,19 @@ class SafeRedisClient {
         }
       );
     });
+    this.startHeartbeat();
+  }
+
+  /**
+   * Start periodic health check
+   */
+  startHeartbeat() {
+    setInterval(async () => {
+      try {
+        await this.ping();
+      } catch (err) {
+      }
+    }, 5000).unref();
   }
 
   /**
@@ -173,7 +182,8 @@ class SafeRedisClient {
    * Safe PING operation - Used for health checks
    */
   async ping() {
-    return await this.client.ping();
+    // Use circuit breaker for ping too, so failures count towards opening the circuit
+    return await this.circuitBreaker.fire(async () => await this.client.ping());
   }
 
   /**
