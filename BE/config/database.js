@@ -8,8 +8,8 @@ const sequelize = new Sequelize(env.DB_NAME, env.DB_USER, env.DB_PASS, {
   logging: false,
   // Performance optimizations
   pool: {
-    max: 20,          // Maximum connections in pool
-    min: 5,           // Minimum connections in pool
+    max: 5,           // Maximum connections in pool
+    min: 2,           // Minimum connections in pool
     acquire: 30000,   // Max time to acquire connection
     idle: 10000,      // Max time before idle connection is released
   },
