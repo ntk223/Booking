@@ -1068,7 +1068,7 @@
   }
 }
 ```
-- **Hiển thị Frontend**: Chuyển hướng đến trang Dashboard quản lý với các menu: Quản lý phòng, Quản lý người dùng, Quản lý booking
+- **Hiển thị Frontend**: Chuyển hướng đến trang Dashboard quản lý với các menu: User, Booking, Room
 
 ---
 
@@ -1104,7 +1104,7 @@
   }
 }
 ```
-- **Hiển thị Frontend**: Chuyển hướng đến trang chủ (không phải Dashboard), nếu user cố truy cập URL dashboard thì hiển thị "Bạn không có quyền truy cập trang này"
+- **Hiển thị Frontend**: Chuyển hướng đến trang chủ (không phải Dashboard)
 
 ---
 
@@ -1113,8 +1113,8 @@
 **Mục đích**: Kiểm tra Admin có thể tạo phòng mới với thông tin hợp lệ
 
 **Điều kiện**: 
-- Admin đã đăng nhập (có token hợp lệ)
-- District với id="1" tồn tại trong hệ thống
+- Admin đã đăng nhập
+- District với id="1" tồn tại
 
 **Input**:
 - Method: `POST`
@@ -1205,7 +1205,7 @@
 - Response body:
 ```json
 {
-  "message": "Access denied. Admin privileges required"
+  "message": "Access denied."
 }
 ```
 - **Hiển thị Frontend**: 
@@ -1288,7 +1288,7 @@
 **Điều kiện**: 
 - Admin đã đăng nhập
 - Phòng với id="5" tồn tại
-- Phòng không có booking đang hoạt động
+- Phòng không được đặt
 
 **Input**:
 - Method: `DELETE`
@@ -1315,7 +1315,7 @@
 
 **Điều kiện**: 
 - Admin đã đăng nhập
-- User với id="10" tồn tại
+- User với id="4" tồn tại
 
 **Input**:
 - Method: `DELETE`
@@ -1340,7 +1340,6 @@
 
 **Điều kiện**: 
 - Admin đã đăng nhập
-- Có nhiều user trong hệ thống
 
 **Input**:
 - Method: `GET`
