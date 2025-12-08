@@ -25,7 +25,9 @@ async function connectToDatabase() {
   }
 }
 
-connectToDatabase();
+if (process.env.NODE_ENV !== 'test') {
+  connectToDatabase();
+}
 // await sequelize.sync({ alter: true });
 
 export default sequelize;

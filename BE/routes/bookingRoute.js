@@ -53,7 +53,7 @@ const Router = express.Router();
  *       400:
  *         description: Invalid input or room already booked
  */
-Router.post("/", validate(createBookingSchema), myBookingController.createBooking);
+Router.post("/", myBookingController.createBooking);
 
 /**
  * @swagger

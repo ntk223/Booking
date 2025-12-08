@@ -1,0 +1,401 @@
+{
+    "annotations": {
+        "list": []
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+        {
+            "datasource": {
+                "type": "loki",
+                "uid": "Loki"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "tooltip": false,
+                            "viz": false,
+                            "legend": false
+                        },
+                        "lineInterpolation": "smooth",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "never",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "reqps"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "ERROR"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "red",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "WARN"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "orange",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "INFO"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "DEBUG"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "sum",
+                        "lastNotNull"
+                    ],
+                    "displayMode": "table",
+                    "placement": "right",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "Loki"
+                    },
+                    "expr": "sum by (level) (rate({job=\"booking-app\"} [1m]))",
+                    "refId": "A",
+                    "legendFormat": "{{level}}"
+                }
+            ],
+            "title": "Log Volume Rate by Level",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "loki",
+                "uid": "Loki"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 100
+                            },
+                            {
+                                "color": "red",
+                                "value": 500
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "ERROR"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "red",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "WARN"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "orange",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "INFO"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 8
+            },
+            "id": 2,
+            "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                    "values": false,
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": ""
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            },
+            "pluginVersion": "9.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "Loki"
+                    },
+                    "expr": "sum(count_over_time({job=\"booking-app\", level=\"ERROR\"} [5m]))",
+                    "refId": "A",
+                    "legendFormat": "ERROR"
+                },
+                {
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "Loki"
+                    },
+                    "expr": "sum(count_over_time({job=\"booking-app\", level=\"WARN\"} [5m]))",
+                    "refId": "B",
+                    "legendFormat": "WARN"
+                },
+                {
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "Loki"
+                    },
+                    "expr": "sum(count_over_time({job=\"booking-app\", level=\"INFO\"} [5m]))",
+                    "refId": "C",
+                    "legendFormat": "INFO"
+                }
+            ],
+            "title": "Log Count by Level (Last 5m)",
+            "type": "gauge"
+        },
+        {
+            "datasource": {
+                "type": "loki",
+                "uid": "Loki"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "hideFrom": {
+                            "tooltip": false,
+                            "viz": false,
+                            "legend": false
+                        }
+                    },
+                    "mappings": []
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 8
+            },
+            "id": 3,
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "right",
+                    "showLegend": true,
+                    "values": [
+                        "value",
+                        "percent"
+                    ]
+                },
+                "pieType": "donut",
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "Loki"
+                    },
+                    "expr": "sum by (level) (count_over_time({job=\"booking-app\"} [$__range]))",
+                    "refId": "A",
+                    "legendFormat": "{{level}}"
+                }
+            ],
+            "title": "Log Distribution by Level",
+            "type": "piechart"
+        },
+        {
+            "datasource": {
+                "type": "loki",
+                "uid": "Loki"
+            },
+            "gridPos": {
+                "h": 15,
+                "w": 24,
+                "x": 0,
+                "y": 24
+            },
+            "id": 7,
+            "options": {
+                "dedupStrategy": "none",
+                "enableLogDetails": true,
+                "prettifyLogMessage": false,
+                "showCommonLabels": false,
+                "showLabels": true,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "wrapLogMessage": true
+            },
+            "targets": [
+                {
+                    "expr": "{job=\"booking-app\"}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Application Logs",
+            "type": "logs"
+        }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 39,
+    "tags": [
+        "booking",
+        "logs"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-1h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Logs Dashboard",
+    "uid": "simple-logs",
+    "version": 1,
+    "weekStart": ""
+}

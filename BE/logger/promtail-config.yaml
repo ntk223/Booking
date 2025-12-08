@@ -16,3 +16,39 @@ scrape_configs:
         labels:
           job: booking-app
           __path__: /app/logs/*.log
+    pipeline_stages:
+      # Parse JSON
+      - json:
+          expressions:
+            level: level
+            message: message
+            timestamp: timestamp
+            requestId: requestId
+            utilService: utilService
+            endpoint: endpoint
+            method: method
+            statusCode: statusCode
+            latency: latency
+            ip: ip
+            stack: stack
+      
+      # Standardize level names
+      - template:
+          source: level
+          template: '{{ ToUpper .Value }}'
+      
+      # Add labels for filtering
+      - labels:
+          level:
+          utilService:
+          method:
+          statusCode:
+      
+      # Format log output with all important fields
+      - template:
+          source: formatted_log
+          template: '[{{ .level }}]{{ if .utilService }} [{{ .utilService }}]{{ end }}{{ if .requestId }} [{{ .requestId }}]{{ end }}{{ if .method }} [{{ .method }}]{{ end }}{{ if .endpoint }} {{ .endpoint }}{{ end }}{{ if .latency }} {{ .latency }}ms{{ end }}{{ if .statusCode }} {{ .statusCode }}{{ end }}{{ if .ip }} ({{ .ip }}){{ end }} - {{ .message }}{{ if .stack }}\n{{ .stack }}{{ end }}'
+      
+      # Use formatted log as output
+      - output:
+          source: formatted_log

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../Layout/Navbar/Navbar";
-import { Modal, Button, message, Spin } from "antd";
+import { Modal, Button, message, Spin, DatePicker, Card } from "antd";
 import { format } from "date-fns"; // Import hàm format từ date-fns
 import { Phone, Users, MapPin, DollarSign } from "lucide-react";
 import "./RoomDetails.css";
@@ -10,10 +10,16 @@ const RoomDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [room, setRoom] = useState({});
+  console.log(room);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const location = useLocation();
-  const { roomId, date, startTime, endTime } = location.state || {};
+  const { roomId, date: initialDate, startTime: initialStartTime, endTime: initialEndTime } = location.state || {};
   const [loading, setLoading] = useState(true);
+  
+  // Date and Time states
+  const [selectedDate, setSelectedDate] = useState(initialDate ? new Date(initialDate) : null);
+  const [selectedStartTime, setSelectedStartTime] = useState(initialStartTime || '');
+  const [selectedEndTime, setSelectedEndTime] = useState(initialEndTime || '');
   // Lấy thông tin người dùng từ sessionStorage
   const user = sessionStorage.getItem("user");
   const userId = user ? JSON.parse(user).id : null;
@@ -25,8 +31,8 @@ const RoomDetails = () => {
       .get(`/rooms/${id}`)
       .then((response) => {
         console.log(response);
-        if (response.data.rooms && response.data.rooms.length > 0) {
-          setRoom(response.data.rooms[0]);
+        if (response.data) {
+          setRoom(response.data);
         } else {
           console.error("Room not found");
         }
@@ -62,19 +68,36 @@ const RoomDetails = () => {
 
   // Xử lý đặt phòng
   const handleBooking = async () => {
+    // Validate inputs
+    if (!selectedDate || !selectedStartTime || !selectedEndTime) {
+      message.error("Vui lòng chọn đầy đủ ngày và giờ!");
+      return;
+    }
+    
+    // Convert time strings to comparable format
+    const startHour = parseInt(selectedStartTime.split(':')[0]);
+    const startMin = parseInt(selectedStartTime.split(':')[1]);
+    const endHour = parseInt(selectedEndTime.split(':')[0]);
+    const endMin = parseInt(selectedEndTime.split(':')[1]);
+    
+    if (startHour > endHour || (startHour === endHour && startMin >= endMin)) {
+      message.error("Giờ bắt đầu phải nhỏ hơn giờ kết thúc!");
+      return;
+    }
+    
     try {
       const bookingData = {
         roomId: id,
         userId: userId, // Sử dụng userId mặc định nếu không có
-        date,
-        startTime,
-        endTime,
+        date: selectedDate.toISOString().split('T')[0], // Format: YYYY-MM-DD
+        startTime: selectedStartTime,
+        endTime: selectedEndTime,
         status: "pending",
       };
 
       // Gửi yêu cầu POST để tạo booking
       const bookingResponse = await api.post(
-        "/booking",
+        "/bookings",
         bookingData
       );
 
@@ -86,9 +109,9 @@ const RoomDetails = () => {
         to: userEmail,
         price: room.price,
         roomName: room.name,
-        date,
-        startTime,
-        endTime,
+        date: selectedDate.toISOString().split('T')[0],
+        startTime: selectedStartTime,
+        endTime: selectedEndTime,
         bookingId, // Đảm bảo sử dụng bookingId ở đây
       };
 
@@ -102,12 +125,12 @@ const RoomDetails = () => {
       setIsModalOpen(false);
 
       // Chuyển hướng đến trang "Cảm ơn" và gửi thêm thông tin booking
-      navigate("/thank-you", {
+      navigate("/", {
         state: {
           room,
-          date,
-          startTime,
-          endTime,
+          date: selectedDate.toISOString().split('T')[0],
+          startTime: selectedStartTime,
+          endTime: selectedEndTime,
           userId,
           bookingId, // Gửi bookingId cùng với các thông tin khác
         },
@@ -188,7 +211,7 @@ const RoomDetails = () => {
           <div className="equipment-section">
             <h2>Trang thiết bị</h2>
             <div className="equipment-grid">
-              {room.equipments ? room.equipments.map((eq, index) => (
+              {room.equipments.length > 0 ? room.equipments.map((eq, index) => (
                 <div className="equipment-item" key={index}>
                   {eq.trim()}
                 </div>
@@ -209,12 +232,58 @@ const RoomDetails = () => {
             </div>
           </div>
 
+          {/* Date and Time Selection */}
+          <div className="booking-section">
+            <Card title="Chọn ngày và giờ đặt phòng" className="booking-card">
+              <div className="datetime-container">
+                <div className="date-picker-container">
+                  <label className="datetime-label">Ngày đặt phòng:</label>
+                  <DatePicker
+                    value={selectedDate}
+                    onChange={setSelectedDate}
+                    format="DD/MM/YYYY"
+                    placeholder="Chọn ngày"
+                    disabledDate={(current) => current && current < new Date().setHours(0,0,0,0)}
+                    className="datetime-picker"
+                  />
+                </div>
+                
+                <div className="time-picker-container">
+                  <div className="time-input-group">
+                    <div className="time-input">
+                      <label className="datetime-label">Giờ bắt đầu:</label>
+                      <input
+                        type="time"
+                        value={selectedStartTime}
+                        onChange={(e) => setSelectedStartTime(e.target.value)}
+                        placeholder="Chọn giờ bắt đầu"
+                        className="datetime-picker"
+                      />
+                    </div>
+                    
+                    <div className="time-input">
+                      <label className="datetime-label">Giờ kết thúc:</label>
+                      <input
+                        type="time"
+                        value={selectedEndTime}
+                        onChange={(e) => setSelectedEndTime(e.target.value)}
+                        placeholder="Chọn giờ kết thúc"
+                        className="datetime-picker"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
           {/* Booking Button */}
           <div className="booking-button-container">
             <Button
               type="primary"
               className="btn-book"
               onClick={() => setIsModalOpen(true)}
+              disabled={!selectedDate || !selectedStartTime || !selectedEndTime}
             >
               Đặt Phòng
             </Button>
@@ -234,10 +303,13 @@ const RoomDetails = () => {
               không?
             </p>
             <p>
-              <strong>Ngày:</strong> {formatDate(date)}
+              <strong>Ngày:</strong> {selectedDate ? formatDate(selectedDate) : 'Chưa chọn'}
             </p>
             <p>
-              <strong>Thời gian:</strong> {startTime} - {endTime}
+              <strong>Thời gian:</strong> {selectedStartTime || 'Chưa chọn'} - {selectedEndTime || 'Chưa chọn'}
+            </p>
+            <p>
+              <strong>Giá:</strong> {room.price} VNĐ/giờ
             </p>
           </Modal>
         </div>
