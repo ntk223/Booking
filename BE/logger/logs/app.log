@@ -5781,3 +5781,57 @@ ApiError: No token provided
 2025-12-01 23:07:54.053 [INFO] [API_RESPONSE] [cf8e3f43-c7d3-4688-b211-b9132aff2550] ::ffff:127.0.0.1 [GET] /metrics 2ms 200 Response: GET /metrics 200 2ms {"payload":{}}
 2025-12-01 23:07:58.211 [INFO] 
   Received shutdown signal, starting graceful shutdown...
+{"level":"info","message":"Booking System Server Started","timestamp":"2025-12-06 21:42:59.264"}
+{"level":"info","message":"API Server: http://localhost:5000","timestamp":"2025-12-06 21:42:59.266"}
+{"level":"info","message":"Health Check: http://localhost:5000/health","timestamp":"2025-12-06 21:42:59.266"}
+{"level":"info","message":"Deep Health Check: http://localhost:5000/health/deep","timestamp":"2025-12-06 21:42:59.266"}
+{"level":"info","message":"Circuit Breaker Status: http://localhost:5000/health/circuits\n","timestamp":"2025-12-06 21:42:59.266"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.271","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.275","utilService":"REDIS"}
+{"level":"info","message":"Database connection established successfully. Host: localhost:3306. Database: meetingroombooking","timestamp":"2025-12-06 21:42:59.327"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.327","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.428","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.580","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.781","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:00.033","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:00.334","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:00.685","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:01.085","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:01.536","utilService":"REDIS"}
+{"level":"error","message":"Redis max retries exceeded","timestamp":"2025-12-06 21:43:02.037","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:02.038","utilService":"REDIS"}
+{"level":"error","message":"Redis connection failed: Redis max retries exceeded","timestamp":"2025-12-06 21:43:02.038","utilService":"REDIS"}
+{"level":"warn","message":"Redis is not available. Caching will be disabled.","timestamp":"2025-12-06 21:43:02.038","utilService":"REDIS"}
+{"level":"info","message":"\n  Received shutdown signal, starting graceful shutdown...","timestamp":"2025-12-06 21:44:34.488"}
+{"level":"info","message":"Booking System Server Started","timestamp":"2025-12-06 21:44:37.224"}
+{"level":"info","message":"API Server: http://localhost:5000","timestamp":"2025-12-06 21:44:37.226"}
+{"level":"info","message":"Health Check: http://localhost:5000/health","timestamp":"2025-12-06 21:44:37.226"}
+{"level":"info","message":"Deep Health Check: http://localhost:5000/health/deep","timestamp":"2025-12-06 21:44:37.226"}
+{"level":"info","message":"Circuit Breaker Status: http://localhost:5000/health/circuits\n","timestamp":"2025-12-06 21:44:37.226"}
+{"level":"info","message":"Connecting to Redis...","timestamp":"2025-12-06 21:44:37.229","utilService":"REDIS"}
+{"level":"info","message":"Redis client ready. Host: 127.0.0.1:6379","timestamp":"2025-12-06 21:44:37.234","utilService":"REDIS"}
+{"level":"info","message":"Database connection established successfully. Host: localhost:3306. Database: meetingroombooking","timestamp":"2025-12-06 21:44:37.261"}
+{"level":"info","message":"\n  Received shutdown signal, starting graceful shutdown...","timestamp":"2025-12-06 21:45:07.849"}
+{"level":"info","message":"Connecting to Redis...","timestamp":"2025-12-06 21:45:14.923","utilService":"REDIS"}
+{"level":"info","message":"Redis client ready. Host: 127.0.0.1:6379","timestamp":"2025-12-06 21:45:14.930","utilService":"REDIS"}
+{"level":"info","message":"Database connection established successfully. Host: localhost:3306. Database: meetingroombooking","timestamp":"2025-12-06 21:45:14.955"}
+{"level":"error","message":"Error: 400 - \"params\" is not allowed","method":"POST","path":"/api/rooms/search","stack":"Error: \"params\" is not allowed\n    at file:///home/ntkien/PROJECT--WEB-/BE/middlewares/validateMiddleware.js:9:21\n    at Layer.handle [as handle_request] (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/layer.js:95:5)\n    at next (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/route.js:149:13)\n    at Route.dispatch (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/route.js:119:3)\n    at Layer.handle [as handle_request] (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/layer.js:95:5)\n    at /home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/index.js:284:15\n    at router.process_params (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/index.js:346:12)\n    at next (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/index.js:280:10)\n    at file:///home/ntkien/PROJECT--WEB-/BE/middlewares/rateLimitMiddleware.js:53:16\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)","timestamp":"2025-12-06 22:01:35.969"}
+{"level":"info","message":"Connecting to Redis...","timestamp":"2025-12-06 22:02:19.497","utilService":"REDIS"}
+{"level":"info","message":"Redis client ready. Host: 127.0.0.1:6379","timestamp":"2025-12-06 22:02:19.501","utilService":"REDIS"}
+{"level":"info","message":"Database connection established successfully. Host: localhost:3306. Database: meetingroombooking","timestamp":"2025-12-06 22:02:19.519"}
+{"level":"info","message":"Connecting to Redis...","timestamp":"2025-12-06 22:02:24.206","utilService":"REDIS"}
+{"level":"info","message":"Redis client ready. Host: 127.0.0.1:6379","timestamp":"2025-12-06 22:02:24.213","utilService":"REDIS"}
+{"level":"info","message":"Database connection established successfully. Host: localhost:3306. Database: meetingroombooking","timestamp":"2025-12-06 22:02:24.237"}
+{"level":"info","message":"Connecting to Redis...","timestamp":"2025-12-06 22:02:27.437","utilService":"REDIS"}
+{"level":"info","message":"Redis client ready. Host: 127.0.0.1:6379","timestamp":"2025-12-06 22:02:27.444","utilService":"REDIS"}
+{"level":"info","message":"Database connection established successfully. Host: localhost:3306. Database: meetingroombooking","timestamp":"2025-12-06 22:02:27.469"}
+{"level":"info","message":"Connecting to Redis...","timestamp":"2025-12-06 22:02:29.398","utilService":"REDIS"}
+{"level":"info","message":"Redis client ready. Host: 127.0.0.1:6379","timestamp":"2025-12-06 22:02:29.404","utilService":"REDIS"}
+{"level":"info","message":"Database connection established successfully. Host: localhost:3306. Database: meetingroombooking","timestamp":"2025-12-06 22:02:29.432"}
+{"level":"info","message":"Connecting to Redis...","timestamp":"2025-12-06 22:03:35.663","utilService":"REDIS"}
+{"level":"info","message":"Redis client ready. Host: 127.0.0.1:6379","timestamp":"2025-12-06 22:03:35.668","utilService":"REDIS"}
+{"level":"info","message":"Database connection established successfully. Host: localhost:3306. Database: meetingroombooking","timestamp":"2025-12-06 22:03:35.693"}
+{"level":"error","message":"Redis error: Socket closed unexpectedly","timestamp":"2025-12-06 23:05:12.987","utilService":"REDIS"}
+{"level":"info","message":"Connecting to Redis...","timestamp":"2025-12-06 23:05:12.988","utilService":"REDIS"}
+{"level":"error","message":"Redis error: Socket closed unexpectedly","timestamp":"2025-12-06 23:05:12.989","utilService":"REDIS"}
+{"level":"info","message":"Redis client ready. Host: 127.0.0.1:6379","timestamp":"2025-12-06 23:05:12.990","utilService":"REDIS"}

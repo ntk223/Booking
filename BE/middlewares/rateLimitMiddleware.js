@@ -1,70 +1,90 @@
 import safeRedisClient from "../config/redis.js";
 import crypto from 'crypto';
 
-/**
- * Tạo hash nhanh bằng SHA256 (Nhanh gấp nghìn lần bcrypt)
- */
-const hashString = (str) => {
-  return crypto.createHash('sha256').update(str).digest('hex');
-}
+const GLOBAL_CAPACITY = 5000;
+const GLOBAL_REFILL_RATE = 100;
+
+const createBucket = async (key, capacity, now, ttl = 3600) => {
+  const bucket = { tokens: capacity - 1, lastRefill: now };
+  await safeRedisClient.set(key, JSON.stringify(bucket), { EX: ttl });
+  return bucket;
+};
+
+const updateBucket = (bucket, capacity, refillRate, now) => {
+  const elapsed = (now - bucket.lastRefill) / 1000;
+  bucket.tokens = Math.min(capacity, bucket.tokens + elapsed * refillRate);
+  bucket.lastRefill = now;
+  return bucket;
+};
+
+const consumeToken = (bucket) => {
+  if (bucket.tokens >= 1) {
+    bucket.tokens -= 1;
+    return true;
+  }
+  return false;
+};
 
 const rateLimitMiddleware = ({ capacity = 100, refillRate = 10 } = {}) => {
   return async (req, res, next) => {
     try {
-      let key = 'ip:' + req.ip; // Mặc định dùng IP
-
-      // Ưu tiên 1: Dùng User ID nếu đã login (Nhanh nhất, chính xác nhất)
-      if (req.user?.id) {
-        key = `user:${req.user.id}`;
-      } 
-      // Ưu tiên 2: Dùng Email hash nếu đang login form (Ẩn danh tính)
-      else if (req.body?.email) {
-        key = `email:${hashString(req.body.email)}`;
-      }
-      
-      const redisKey = `ratelimit:${key}`;
       const now = Date.now();
 
-      // --- Tối ưu Redis Transaction (Tránh Race Condition) ---
-      // Lấy bucket và update trong cùng 1 logic nếu có thể, 
-      // hoặc dùng logic get/set như cũ nhưng chấp nhận sai số nhỏ.
-      
-      const bucketData = await safeRedisClient.get(redisKey);
+      // Determine key: userID → IP
+      const key = req.user?.id
+        ? `user:${req.user.id}`
+        : `ip:${req.ip}`;
+
+      const redisKey = `ratelimit:${key}`;
+      const globalKey = "ratelimit:global";
+
+      // ---- GLOBAL LIMIT ----
+      let gData = await safeRedisClient.get(globalKey);
+      let globalBucket;
+
+      if (!gData) {
+        globalBucket = await createBucket(globalKey, GLOBAL_CAPACITY, now);
+      } else {
+        globalBucket = updateBucket(JSON.parse(gData), GLOBAL_CAPACITY, GLOBAL_REFILL_RATE, now);
+        if (!consumeToken(globalBucket)) {
+          const retryAfter = Math.ceil((1 - globalBucket.tokens) / GLOBAL_REFILL_RATE);
+          res.set("Retry-After", retryAfter);
+          return res.status(429).json({
+            success: false,
+            message: "Too Many Requests - Global Rate Limit",
+            retryAfterSeconds: retryAfter
+          });
+        }
+        safeRedisClient.set(globalKey, JSON.stringify(globalBucket), { EX: 3600 });
+      }
+
+      // ---- LOCAL LIMIT ----
+      let data = await safeRedisClient.get(redisKey);
       let bucket;
 
-      if (!bucketData) {
-        bucket = { tokens: capacity - 1, lastRefill: now };
-        await safeRedisClient.set(redisKey, JSON.stringify(bucket), { EX: 3600 });
+      if (!data) {
+        bucket = await createBucket(redisKey, capacity, now);
         return next();
       }
 
-      bucket = JSON.parse(bucketData);
-      
-      // Tính toán refill
-      const elapsed = (now - bucket.lastRefill) / 1000;
-      // Refill không được vượt quá capacity
-      bucket.tokens = Math.min(capacity, bucket.tokens + (elapsed * refillRate));
-      bucket.lastRefill = now;
+      bucket = updateBucket(JSON.parse(data), capacity, refillRate, now);
 
-      if (bucket.tokens >= 1) {
-        bucket.tokens -= 1;
-        // Set lại vào Redis (Không cần await để giảm latency response cho user)
-        safeRedisClient.set(redisKey, JSON.stringify(bucket), { EX: 3600 });
-        return next();
+      if (!consumeToken(bucket)) {
+        const retryAfter = Math.ceil((1 - bucket.tokens) / refillRate);
+        res.set("Retry-After", retryAfter);
+        return res.status(429).json({
+          success: false,
+          message: "Too Many Requests",
+          retryAfterSeconds: retryAfter
+        });
       }
 
-      // Bị chặn
-      const retryAfter = Math.ceil((1 - bucket.tokens) / refillRate);
-      res.set("Retry-After", retryAfter);
-      return res.status(429).json({
-        success: false,
-        message: "Too Many Requests",
-        retryAfterSeconds: retryAfter
-      });
+      safeRedisClient.set(redisKey, JSON.stringify(bucket), { EX: 3600 });
+      next();
 
     } catch (err) {
       console.error("RateLimit error:", err);
-      return next();
+      next();
     }
   };
 };

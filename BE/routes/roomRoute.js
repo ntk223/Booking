@@ -73,6 +73,8 @@ Router.get("/:id", roomController.getRoomDetails);
  *         description: List of rooms matching criteria
  */
 Router.post("/search", validate(searchRoomSchema), roomController.searchRooms);
+// Router.post("/search", validate(searchRoomSchema), myRoomController.searchRooms);
+// Router.post("/search", myRoomController.searchRooms);
 
 // Protected routes
 Router.use(verifyTokenMiddleware);

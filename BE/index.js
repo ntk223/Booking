@@ -5,7 +5,7 @@ import { APIs } from "./routes/index.js";
 import { env } from "./config/environment.js";
 import { errorHandlingMiddleware } from "./middlewares/errorHandlingMiddleware.js";
 import { corsOptions } from "./config/cors.js";
-import { swaggerDocs } from './config/swagger.js';
+import { swaggerDocs } from "./config/swagger.js";
 import cors from "cors";
 import { healthChecker } from "./utils/HealthChecker.js";
 import safeRedisClient from "./config/redis.js";
@@ -14,6 +14,10 @@ import { requestIdMiddleware } from "./middlewares/requestIdMiddleware.js";
 import { requestLoggerMiddleware } from "./middlewares/requestLoggerMiddleware.js";
 import { getMetrics, getContentType, httpRequestDurationMicroseconds } from "./utils/metrics.js";
 import { resolve } from "./config/serviceContainer.js";
+import { GCPService } from "./services/GCPService.js";
+import { serverAdapter } from "./config/bullBoard.js";
+import emailWorker from "./workers/emailWorker.js";
+import { getQueueStats } from "./queues/emailQueue.js";
 
 // Resolve GCPService from DI container (with automatic dependency injection)
 const myGCPService = resolve('gcpService');
@@ -42,7 +46,11 @@ const START_SERVER = () => {
     res.on("finish", () => {
       const duration = Date.now() - start;
       httpRequestDurationMicroseconds
-        .labels(req.method, req.route ? req.route.path : req.path, res.statusCode)
+        .labels(
+          req.method,
+          req.route ? req.route.path : req.path,
+          res.statusCode
+        )
         .observe(duration / 1000); // Convert to seconds
     });
     next();
@@ -78,6 +86,20 @@ const START_SERVER = () => {
     });
   });
 
+  // Email queue statistics endpoint
+  app.get("/health/queue", async (req, res) => {
+    try {
+      const stats = await getQueueStats();
+      res.status(200).json({
+        timestamp: new Date().toISOString(),
+        queue: "email-queue",
+        stats,
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Prometheus Metrics Endpoint
   app.get("/metrics", async (req, res) => {
     try {
@@ -87,6 +109,9 @@ const START_SERVER = () => {
       res.status(500).end(ex);
     }
   });
+
+  // Bull Board UI for queue monitoring
+  app.use("/admin/queues", serverAdapter.getRouter());
 
   app.use("/api", APIs);
 
@@ -105,7 +130,13 @@ const START_SERVER = () => {
       `Deep Health Check: http://localhost:${env.APP_PORT}/health/deep`
     );
     logger.info(
-      `Circuit Breaker Status: http://localhost:${env.APP_PORT}/health/circuits\n`
+      `Circuit Breaker Status: http://localhost:${env.APP_PORT}/health/circuits`
+    );
+    logger.info(
+      `Queue Monitoring UI: http://localhost:${env.APP_PORT}/admin/queues`
+    );
+    logger.info(
+      `Queue Statistics: http://localhost:${env.APP_PORT}/health/queue\n`
     );
   });
 
@@ -114,8 +145,16 @@ const START_SERVER = () => {
   server.headersTimeout = 66000;   // Should be higher than keepAliveTimeout
 
   // Graceful shutdown
-  const gracefulShutdown = () => {
+  const gracefulShutdown = async () => {
     logger.info("\n  Received shutdown signal, starting graceful shutdown...");
+
+    // Close email worker
+    try {
+      await emailWorker.close();
+      logger.info(" Email worker closed");
+    } catch (error) {
+      logger.error(" Error closing email worker:", error);
+    }
 
     server.close(() => {
       logger.info(" HTTP server closed");

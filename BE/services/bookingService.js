@@ -1,5 +1,10 @@
 import { Op } from "sequelize";
 import { Booking } from "../models/Model.js";
+import {
+  queueBookingConfirmation,
+  queueBookingCancellation,
+  queueBookingReminder,
+} from "../queues/emailQueue.js";
 import logger from "../logger/winston.log.js";
 
 class BookingService {
@@ -23,126 +28,118 @@ class BookingService {
         const lockValue = `${Date.now()}-${Math.random()}`;
         const lockTTL = 10; // 10 seconds TTL
 
-        let lockAcquired = false;
+        const newBooking = await this.bookingRepo.createBooking(bookingData, t);
 
+        // Queue confirmation email after successful booking
         try {
-            // Try to acquire distributed lock using Redis
-            lockAcquired = await this.redisClient.set(lockKey, lockValue, {
-                EX: lockTTL,
-                NX: true  // Only set if not exists
+          // Get user and room details for email
+          const bookingDetails = await Booking.findByPk(newBooking.id, {
+            include: ["User", "Room"],
+            transaction: t,
+          });
+
+          if (bookingDetails?.User?.email) {
+            // Queue booking confirmation email
+            await queueBookingConfirmation({
+              userEmail: bookingDetails.User.email,
+              userName:
+                bookingDetails.User.fullName || bookingDetails.User.email,
+              roomName: bookingDetails.Room?.name || "Unknown Room",
+              startTime: `${bookingDetails.date} ${bookingDetails.startTime}`,
+              endTime: `${bookingDetails.date} ${bookingDetails.endTime}`,
+              bookingId: bookingDetails.id,
             });
 
-            if (!lockAcquired) {
-                throw new Error("Another booking is in progress for this time slot. Please try again.");
-            }
-
-            // Use database transaction with Redis lock for double protection
-            return await this.sequelize.transaction(async (t) => {
-                // Check for overlapping bookings
-                const existingBookings = await Booking.findAll({
-                    where: {
-                        roomId: bookingData.roomId,
-                        date: bookingData.date,
-                        status: {
-                            [Op.ne]: 'cancelled'
-                        },
-                        [Op.not]: {
-                            [Op.or]: [
-                                { endTime: { [Op.lte]: bookingData.startTime } },
-                                { startTime: { [Op.gte]: bookingData.endTime } },
-                            ]
-                        }
-                    },
-                    lock: t.LOCK.UPDATE,
-                    transaction: t
-                });
-
-                if (existingBookings.length > 0) {
-                    throw new Error("Room is already booked for the selected time slot.");
-                }
-
-                const newBooking = await this.bookingRepo.createBooking(bookingData, t);
-
-                // Invalidate User History Cache
-                await this.cacheManager.del(`bookings:user:${bookingData.userId}`);
-
-                return newBooking;
+            // Queue reminder email (sent 1 day before)
+            await queueBookingReminder({
+              userEmail: bookingDetails.User.email,
+              userName:
+                bookingDetails.User.fullName || bookingDetails.User.email,
+              roomName: bookingDetails.Room?.name || "Unknown Room",
+              startTime: `${bookingDetails.date} ${bookingDetails.startTime}`,
+              endTime: `${bookingDetails.date} ${bookingDetails.endTime}`,
+              bookingId: bookingDetails.id,
             });
-        } catch (error) {
-            throw error;
-        } finally {
-            // Release Redis lock if we acquired it
-            if (lockAcquired) {
-                try {
-                    const currentValue = await this.redisClient.get(lockKey);
-                    // Only delete if we still own the lock
-                    if (currentValue === lockValue) {
-                        await this.redisClient.del(lockKey);
-                    }
-                } catch (err) {
-                    logger.error('Failed to release Redis lock', {
-                        error: err.message,
-                        lockKey,
-                        lockValue,
-                        utilService: 'BOOKING_SERVICE'
-                    });
-                }
-            }
+
+            logger.info("[BOOKING] Emails queued for booking", {
+              bookingId: newBooking.id,
+            });
+          }
+        } catch (emailError) {
+          // Don't fail booking if email queueing fails
+          logger.error("[BOOKING] Failed to queue emails:", emailError);
         }
-    }
 
-    async getAllBookings(page = 1) {
-        return await this.bookingRepo.getBookingDetails(null, page);
-    }
-
-    async deleteBooking(bookingId) {
-        return await this.bookingRepo.deleteBooking(bookingId);
-    }
-
-    async updateBookingStatus(bookingId, status) {
-        const result = await this.bookingRepo.updateBookingStatus(bookingId, status);
-        // We need userId to invalidate cache. 
-        // Ideally we should fetch booking first, but that adds overhead.
-        // Alternatively, we can clear ALL user caches? No.
-        // Let's fetch the booking briefly to get userId.
+        return newBooking;
+      });
+    } catch (error) {
+      throw error;
+    } finally {
+      // Release Redis lock if we acquired it
+      if (lockAcquired) {
         try {
-            const booking = await this.bookingRepo.findById(bookingId);
-            if (booking) {
-                await this.cacheManager.del(`bookings:user:${booking.userId}`);
-                logger.info('Cache invalidated after booking status update', {
-                    bookingId,
-                    userId: booking.userId,
-                    newStatus: status,
-                    utilService: 'BOOKING_SERVICE'
-                });
-            } else {
-                logger.warn('Booking not found for cache invalidation', {
-                    bookingId,
-                    utilService: 'BOOKING_SERVICE'
-                });
-            }
+          const currentValue = await this.redisClient.get(lockKey);
+          // Only delete if we still own the lock
+          if (currentValue === lockValue) {
+            await this.redisClient.del(lockKey);
+          }
         } catch (err) {
-            logger.error('Failed to invalidate cache after booking status update', {
-                error: err.message,
-                bookingId,
-                status,
-                utilService: 'BOOKING_SERVICE'
-            });
+          console.error("[ERROR] Failed to release Redis lock:", err.message);
         }
-        return result;
+      }
+    }
+  }
+
+  async getAllBookings() {
+    return await this.bookingRepo.getBookingDetails();
+  }
+
+  async deleteBooking(bookingId) {
+    return await this.bookingRepo.deleteBooking(bookingId);
+  }
+
+  async updateBookingStatus(bookingId, status) {
+    const result = await this.bookingRepo.updateBookingStatus(
+      bookingId,
+      status
+    );
+
+    // If status is cancelled, queue cancellation email
+    if (status === "cancelled") {
+      try {
+        const bookingDetails = await Booking.findByPk(bookingId, {
+          include: ["User", "Room"],
+        });
+
+        if (bookingDetails?.User?.email) {
+          await queueBookingCancellation({
+            userEmail: bookingDetails.User.email,
+            userName: bookingDetails.User.fullName || bookingDetails.User.email,
+            roomName: bookingDetails.Room?.name || "Unknown Room",
+            startTime: `${bookingDetails.date} ${bookingDetails.startTime}`,
+            bookingId: bookingDetails.id,
+          });
+
+          logger.info("[BOOKING] Cancellation email queued", { bookingId });
+        }
+      } catch (emailError) {
+        logger.error(
+          "[BOOKING] Failed to queue cancellation email:",
+          emailError
+        );
+      }
     }
 
-    async getBookingDetails(bookingId) {
-        return await this.bookingRepo.getBookingDetails(bookingId);
-    }
+    return result;
+  }
 
-    async getBookingsByUser(userId) {
-        // Cache key: bookings:user:{userId}
-        const key = `bookings:user:${userId}`;
-        return await this.cacheManager.getOrSet(key, async () => {
-            return await this.bookingRepo.getBookingsByUserId(userId);
-        }, 300); // 5 minutes TTL
-    }
+  async getBookingDetails(bookingId) {
+    return await this.bookingRepo.getBookingDetails(bookingId);
+  }
+
+  async getBookingsByUser(userId) {
+    return await this.bookingRepo.getBookingsByUserId(userId);
+  }
 }
 
 export { BookingService };

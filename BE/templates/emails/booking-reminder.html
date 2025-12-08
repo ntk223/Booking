@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nhắc nhở đặt phòng</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        background: #f9f9f9;
+        padding: 30px;
+        border: 1px solid #ddd;
+        border-top: none;
+      }
+      .booking-details {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .footer {
+        background: #f9f9f9;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid #ddd;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        color: #666;
+        font-size: 14px;
+      }
+      .reminder-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+      .alert-box {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="reminder-icon">🔔</div>
+      <h1>Nhắc nhở đặt phòng</h1>
+    </div>
+
+    <div class="content">
+      <p>Xin chào <strong>{{userName}}</strong>,</p>
+
+      <div class="alert-box">
+        <strong>⏰ Lịch họp sắp diễn ra!</strong><br />
+        Bạn có một buổi họp được đặt trước vào ngày mai.
+      </div>
+
+      <div class="booking-details">
+        <h3 style="margin-top: 0; color: #4facfe">Thông tin đặt phòng</h3>
+        <p><strong>Mã đặt phòng:</strong> #{{bookingId}}</p>
+        <p><strong>Phòng họp:</strong> {{roomName}}</p>
+        <p><strong>Thời gian bắt đầu:</strong> {{startTime}}</p>
+        <p><strong>Thời gian kết thúc:</strong> {{endTime}}</p>
+      </div>
+
+      <p><strong>Lưu ý:</strong></p>
+      <ul>
+        <li>Vui lòng đến đúng giờ</li>
+        <li>Chuẩn bị tài liệu cần thiết trước buổi họp</li>
+        <li>Nếu cần hủy, vui lòng thông báo sớm</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+      <p>&copy; 2025 Booking System. All rights reserved.</p>
+    </div>
+  </body>
+</html>
