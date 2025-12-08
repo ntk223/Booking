@@ -123,19 +123,6 @@ emailWorker.on("stalled", (jobId) => {
   logger.warn("[EMAIL WORKER] Job stalled", { jobId });
 });
 
-//Shutdown
-process.on("SIGTERM", async () => {
-  logger.info("[EMAIL WORKER] Shutting down worker gracefully...");
-  await emailWorker.close();
-  process.exit(0);
-});
-
-process.on("SIGINT", async () => {
-  logger.info("[EMAIL WORKER] Shutting down worker gracefully...");
-  await emailWorker.close();
-  process.exit(0);
-});
-
 logger.info("[EMAIL WORKER] Email worker started successfully", {
   concurrency: 5,
   rateLimit: "10 jobs/second",
