@@ -7,7 +7,7 @@ const Register = () => {
 
   // State lưu thông tin form
   const [name, setName] = useState("");
-  const [phone_number, setPhone] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -16,7 +16,7 @@ const Register = () => {
     e.preventDefault(); // Ngừng hành động mặc định của form
 
     // Kiểm tra đầu vào trước khi gửi yêu cầu
-    if (!name || !phone_number || !email || !password) {
+    if (!name || !phone || !email || !password) {
       setMessage("Vui lòng điền đầy đủ thông tin!");
       return;
     }
@@ -30,7 +30,7 @@ const Register = () => {
 
     // Kiểm tra số điện thoại (chỉ là ví dụ)
     const phonePattern = /^[0-9]{10}$/;
-    if (!phonePattern.test(phone_number)) {
+    if (!phonePattern.test(phone)) {
       setMessage("Số điện thoại không hợp lệ!");
       return;
     }
@@ -39,7 +39,7 @@ const Register = () => {
       // Gửi yêu cầu đăng kí tới API
       const res = await api.post("/auth/register", {
         name,
-        phone_number,
+        phone,
         email,
         password,
       });
@@ -75,7 +75,7 @@ const Register = () => {
         <input
           type="tel"
           placeholder="Số điện thoại"
-          value={phone_number}
+          value={phone}
           onChange={(e) => setPhone(e.target.value)}
           required
         />
