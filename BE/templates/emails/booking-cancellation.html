@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hủy đặt phòng</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        background: #f9f9f9;
+        padding: 30px;
+        border: 1px solid #ddd;
+        border-top: none;
+      }
+      .booking-details {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .footer {
+        background: #f9f9f9;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid #ddd;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        color: #666;
+        font-size: 14px;
+      }
+      .cancel-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="cancel-icon">✕</div>
+      <h1>Đặt phòng đã bị hủy</h1>
+    </div>
+
+    <div class="content">
+      <p>Xin chào <strong>{{userName}}</strong>,</p>
+
+      <p>Đặt phòng của bạn đã được hủy thành công.</p>
+
+      <div class="booking-details">
+        <h3 style="margin-top: 0; color: #f5576c">
+          Thông tin đặt phòng đã hủy
+        </h3>
+        <p><strong>Mã đặt phòng:</strong> #{{bookingId}}</p>
+        <p><strong>Phòng họp:</strong> {{roomName}}</p>
+        <p><strong>Thời gian:</strong> {{startTime}}</p>
+      </div>
+
+      <p>
+        Nếu bạn muốn đặt phòng khác, vui lòng truy cập hệ thống của chúng tôi.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+      <p>&copy; 2025 Booking System. All rights reserved.</p>
+    </div>
+  </body>
+</html>
