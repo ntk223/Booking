@@ -8,57 +8,25 @@ import {
 import logger from "../logger/winston.log.js";
 
 class BookingService {
-  constructor(bookingRepo, redisClient, sequelize) {
-    this.bookingRepo = bookingRepo;
-    this.redisClient = redisClient;
-    this.sequelize = sequelize;
-  }
+    constructor({ bookingRepo, redisClient, sequelize, cacheManager }) {
+        this.bookingRepo = bookingRepo;
+        this.redisClient = redisClient;
+        this.sequelize = sequelize;
+        this.cacheManager = cacheManager;
+    }
 
-  async createBooking(bookingData) {
-    // Create distributed lock key
-    const lockKey = `booking:lock:${bookingData.roomId}:${bookingData.date}:${bookingData.startTime}`;
-    const lockValue = `${Date.now()}-${Math.random()}`;
-    const lockTTL = 10; // 10 seconds TTL
+    async queueBooking(bookingData) {
+        // Push booking data to Redis Queue
+        const QUEUE_KEY = "booking:queue";
+        await this.redisClient.lPush(QUEUE_KEY, JSON.stringify(bookingData));
+        return true;
+    }
 
-    let lockAcquired = false;
-
-    try {
-      // Try to acquire distributed lock using Redis
-      lockAcquired = await this.redisClient.set(lockKey, lockValue, {
-        EX: lockTTL,
-        NX: true, // Only set if not exists
-      });
-
-      if (!lockAcquired) {
-        throw new Error(
-          "Another booking is in progress for this time slot. Please try again."
-        );
-      }
-
-      // Use database transaction with Redis lock for double protection
-      return await this.sequelize.transaction(async (t) => {
-        // Check for overlapping bookings
-        const existingBookings = await Booking.findAll({
-          where: {
-            roomId: bookingData.roomId,
-            date: bookingData.date,
-            status: {
-              [Op.ne]: "cancelled",
-            },
-            [Op.not]: {
-              [Op.or]: [
-                { endTime: { [Op.lte]: bookingData.startTime } },
-                { startTime: { [Op.gte]: bookingData.endTime } },
-              ],
-            },
-          },
-          lock: t.LOCK.UPDATE,
-          transaction: t,
-        });
-
-        if (existingBookings.length > 0) {
-          throw new Error("Room is already booked for the selected time slot.");
-        }
+    async processBookingRequest(bookingData) {
+        // Create distributed lock key
+        const lockKey = `booking:lock:${bookingData.roomId}:${bookingData.date}:${bookingData.startTime}`;
+        const lockValue = `${Date.now()}-${Math.random()}`;
+        const lockTTL = 10; // 10 seconds TTL
 
         const newBooking = await this.bookingRepo.createBooking(bookingData, t);
 

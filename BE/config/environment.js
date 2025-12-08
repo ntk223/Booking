@@ -17,8 +17,8 @@ export const env = {
     // CACHE_EXPIRATION: process.env.CACHE_EXPIRATION,
 
     // Circuit Breaker Configuration
-    CIRCUIT_BREAKER_FAILURE_THRESHOLD: parseFloat(process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD) || 0.5,  // 50% error rate
-    CIRCUIT_BREAKER_VOLUME_THRESHOLD: parseInt(process.env.CIRCUIT_BREAKER_VOLUME_THRESHOLD) || 5,        // minimum 5 requests
-    CIRCUIT_BREAKER_TIMEOUT: parseInt(process.env.CIRCUIT_BREAKER_TIMEOUT) || 30000,                      // 30 seconds
+    CIRCUIT_BREAKER_FAILURE_THRESHOLD: parseFloat(process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD) || 0.2,  // 20% error rate
+    CIRCUIT_BREAKER_VOLUME_THRESHOLD: parseInt(process.env.CIRCUIT_BREAKER_VOLUME_THRESHOLD) || 3,        // minimum 3 requests
+    CIRCUIT_BREAKER_TIMEOUT: parseInt(process.env.CIRCUIT_BREAKER_TIMEOUT) || 1000,                       // 1 second (fast fail for Redis)
     CIRCUIT_BREAKER_ROLLING_COUNT_TIMEOUT: parseInt(process.env.CIRCUIT_BREAKER_ROLLING_COUNT_TIMEOUT) || 60000, // 60 seconds window
 }

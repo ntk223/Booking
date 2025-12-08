@@ -1,10 +1,11 @@
 import express from "express";
-import { DistrictController } from "../controllers/districtController.js";
+import { resolve } from "../config/serviceContainer.js";
 
-const myDistrictController = new DistrictController();
+// Resolve controller from DI container (with automatic dependency injection)
+const districtController = resolve('districtController');
 
 const Router = express.Router();
 
-Router.get("/", myDistrictController.getAllDistricts);
+Router.get("/", districtController.getAllDistricts);
 
 export const districtRoute = Router;

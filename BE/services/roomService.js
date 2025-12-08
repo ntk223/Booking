@@ -1,7 +1,7 @@
 
 
 class RoomService {
-    constructor(roomRepo, cacheManager) {
+    constructor({ roomRepo, cacheManager }) {
         this.roomRepo = roomRepo;
         this.cacheManager = cacheManager;
     }

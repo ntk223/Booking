@@ -4,8 +4,13 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { RoomDTO } from "../dtos/RoomDTO.js";
 
 export class RoomController {
-  constructor(roomService) {
+  constructor({ roomService }) {
     this.roomService = roomService;
+    console.log('RoomController initialized');
+    console.log('roomService type:', typeof this.roomService);
+    try {
+      console.log('roomService keys:', Object.keys(this.roomService));
+    } catch (e) { console.log('Cannot list keys of roomService'); }
   }
 
   createRoom = asyncHandler(async (req, res) => {

@@ -6,19 +6,3 @@ scrape_configs:
     metrics_path: '/metrics'
     static_configs:
       - targets: ['host.docker.internal:5000']
-  
-  - job_name: 'booking_database'
-    static_configs:
-      - targets: ['mysql-exporter:9104']
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: instance
-        replacement: 'booking_mysql'
-  
-  - job_name: 'booking_redis'
-    static_configs:
-      - targets: ['redis-exporter:9121']
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: instance
-        replacement: 'booking_redis'

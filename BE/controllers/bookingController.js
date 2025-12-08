@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { BookingDTO } from "../dtos/BookingDTO.js";
 
 export class BookingController {
-  constructor(bookingService) {
+  constructor({ bookingService }) {
     this.bookingService = bookingService;
   }
 
