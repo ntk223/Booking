@@ -5,6 +5,7 @@ import CircuitBreaker from "opossum";
 import { registerCircuitBreaker } from "../utils/metrics.js";
 import { env } from "../config/environment.js";
 import logger from "../logger/winston.log.js";
+import { withStorageRetry } from "../utils/retry.js";
 
 dotenv.config();
 

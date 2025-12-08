@@ -226,3 +226,20 @@ ApiError: No token provided
     at file:///E:/Code/Booking/BE/middlewares/rateLimitMiddleware.js:53:16
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
 2025-12-01 12:03:03.368 [ERROR] [API_RESPONSE] [ad41e26e-ac6e-47b9-85dc-76654baef3be] ::1 [POST] /api/rooms/search 8ms 401 Response: POST /api/rooms/search 401 8ms {"payload":{}}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.271","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.275","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.327","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.428","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.580","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:42:59.781","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:00.033","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:00.334","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:00.685","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:01.085","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:01.536","utilService":"REDIS"}
+{"level":"error","message":"Redis max retries exceeded","timestamp":"2025-12-06 21:43:02.037","utilService":"REDIS"}
+{"level":"error","message":"Redis error: connect ECONNREFUSED 127.0.0.1:6379","timestamp":"2025-12-06 21:43:02.038","utilService":"REDIS"}
+{"level":"error","message":"Redis connection failed: Redis max retries exceeded","timestamp":"2025-12-06 21:43:02.038","utilService":"REDIS"}
+{"level":"error","message":"Error: 400 - \"params\" is not allowed","method":"POST","path":"/api/rooms/search","stack":"Error: \"params\" is not allowed\n    at file:///home/ntkien/PROJECT--WEB-/BE/middlewares/validateMiddleware.js:9:21\n    at Layer.handle [as handle_request] (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/layer.js:95:5)\n    at next (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/route.js:149:13)\n    at Route.dispatch (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/route.js:119:3)\n    at Layer.handle [as handle_request] (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/layer.js:95:5)\n    at /home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/index.js:284:15\n    at router.process_params (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/index.js:346:12)\n    at next (/home/ntkien/PROJECT--WEB-/BE/node_modules/express/lib/router/index.js:280:10)\n    at file:///home/ntkien/PROJECT--WEB-/BE/middlewares/rateLimitMiddleware.js:53:16\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)","timestamp":"2025-12-06 22:01:35.969"}
+{"level":"error","message":"Redis error: Socket closed unexpectedly","timestamp":"2025-12-06 23:05:12.987","utilService":"REDIS"}
+{"level":"error","message":"Redis error: Socket closed unexpectedly","timestamp":"2025-12-06 23:05:12.989","utilService":"REDIS"}

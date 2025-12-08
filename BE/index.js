@@ -1,4 +1,5 @@
 import express from "express";
+import compression from "compression";
 import { APIs } from "./routes/index.js";
 
 import { env } from "./config/environment.js";
@@ -31,6 +32,10 @@ const START_SERVER = () => {
   // collectDefaultMetrics({ prefix: prefix });
 
   app.use(cors(corsOptions));
+
+  // Performance: Enable gzip compression for responses > 1KB
+  app.use(compression({ threshold: 1024 }));
+
   app.use(express.json());
 
   // Request ID middleware (before other middlewares and routes)
@@ -136,6 +141,10 @@ const START_SERVER = () => {
       `Queue Statistics: http://localhost:${env.APP_PORT}/health/queue\n`
     );
   });
+
+  // Performance: HTTP Keep-Alive settings
+  server.keepAliveTimeout = 65000; // Slightly higher than typical load balancer timeout (60s)
+  server.headersTimeout = 66000;   // Should be higher than keepAliveTimeout
 
   // Graceful shutdown
   const gracefulShutdown = async () => {

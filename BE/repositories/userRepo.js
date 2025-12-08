@@ -19,8 +19,10 @@ class UserRepository extends BaseRepository {
         return await this.create(userData);
     }
 
-    async getAllUsers() {
-        return await this.findAll();
+    async getAllUsers(page = 1) {
+        if (page < 1) page = 1;
+        const { data, currentPage, totalPages } = await this.paginate(page);
+        return { users: data, currentPage, totalPages };
     }
 
     async deleteUser(userId) {

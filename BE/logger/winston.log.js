@@ -62,7 +62,7 @@ const logger = winston.createLogger({
     json()
   ),
   transports: [
-    // new winston.transports.Console(),
+    new winston.transports.Console(),
     new winston.transports.File({
       filename: path.join(logDir, "error.log"),
       level: "error",

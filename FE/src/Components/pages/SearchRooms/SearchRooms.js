@@ -95,7 +95,7 @@ function SearchRooms() {
     setLoading(true);
 
     try {
-      const response = await api.get("/search", {
+      const response = await api.post("/rooms/search", {
         params: filters,
       });
       setRooms(response.data);

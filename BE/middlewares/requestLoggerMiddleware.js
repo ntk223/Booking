@@ -1,6 +1,14 @@
 import logger, { createLogMetadata } from "../logger/winston.log.js";
 
+// Endpoints to skip logging for (high frequency, low value)
+const SKIP_LOGGING_PATHS = ['/health', '/health/deep', '/health/circuits', '/metrics'];
+
 export const requestLoggerMiddleware = (req, res, next) => {
+    // Skip logging for health check and metrics endpoints
+    if (SKIP_LOGGING_PATHS.some(path => req.originalUrl.startsWith(path))) {
+        return next();
+    }
+
     const startTime = Date.now();
 
     // Log request

@@ -4,9 +4,10 @@ import { UserService } from "../services/userService.js";
 import { userRepo } from "../repositories/userRepo.js";
 import { validate } from "../middlewares/validateMiddleware.js";
 import { createUserSchema, updateUserSchema } from "../validations/userValidation.js";
+import { cacheManager } from "../utils/CacheManager.js";
 
 // Dependency Injection
-const myUserService = new UserService(userRepo);
+const myUserService = new UserService(userRepo, cacheManager);
 const myUserController = new UserController(myUserService);
 
 const Router = express.Router();

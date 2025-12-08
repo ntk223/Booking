@@ -18,6 +18,20 @@ const Room = sequelize.define("Room", {
   timestamps: true,
   paranoid: true,
   underscored: true,
+  indexes: [
+    {
+      name: 'room_capacity_idx',
+      fields: ['capacity']
+    },
+    {
+      name: 'room_district_idx',
+      fields: ['district_id']
+    },
+    {
+      name: 'room_price_idx',
+      fields: ['price']
+    }
+  ]
 });
 
 export default Room;
