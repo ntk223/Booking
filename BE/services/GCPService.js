@@ -11,32 +11,31 @@ dotenv.config();
 
 class GCPService {
   constructor() {
-    // Skip GCS initialization if credentials are not provided
+    // Check if GCP credentials are configured
     if (!process.env.GCP_KEY_FILE_PATH || !process.env.GCP_PROJECT_ID) {
       logger.warn(
-        "GCS credentials not configured. GCS operations will be disabled.",
-        {
-          utilService: "GCS",
-        }
+        "[GCS] GCS credentials not configured. GCS operations will be disabled."
       );
       this.storage = null;
       this.bucketName = null;
-    } else {
-      this.storage = new Storage({
-        projectId: process.env.GCP_PROJECT_ID,
-        keyFilename: path.resolve(process.env.GCP_KEY_FILE_PATH),
-      });
-      this.bucketName = process.env.GCP_BUCKET_NAME;
+      this.circuitBreaker = null;
+      return;
     }
 
-        const options = {
-            name: 'gcs-circuit-breaker',
-            timeout: env.CIRCUIT_BREAKER_TIMEOUT,
-            errorThresholdPercentage: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD * 100,
-            resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT,
-            volumeThreshold: env.CIRCUIT_BREAKER_VOLUME_THRESHOLD,
-            rollingCountTimeout: env.CIRCUIT_BREAKER_ROLLING_COUNT_TIMEOUT,
-        };
+    this.storage = new Storage({
+      projectId: process.env.GCP_PROJECT_ID,
+      keyFilename: path.resolve(process.env.GCP_KEY_FILE_PATH),
+    });
+    this.bucketName = process.env.GCP_BUCKET_NAME;
+
+    const options = {
+      name: "gcs-circuit-breaker",
+      timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000,
+      errorThresholdPercentage:
+        (env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || 0.5) * 100,
+      resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000,
+      volumeThreshold: 5,
+    };
 
     this.circuitBreaker = new CircuitBreaker(
       async (operation) => operation(),
@@ -62,28 +61,20 @@ class GCPService {
    * @returns {Promise<string>} - The signed URL.
    */
   async generateUploadUrl(filename, contentType) {
-    if (!this.storage) {
-      throw new Error(
-        "GCS is not configured. Please set GCP_KEY_FILE_PATH and GCP_PROJECT_ID in .env"
-      );
-    }
-
     return this.circuitBreaker.fire(async () => {
-      return withStorageRetry(async () => {
-        const options = {
-          version: "v4",
-          action: "write",
-          expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-          contentType: contentType,
-        };
+      const options = {
+        version: "v4",
+        action: "write",
+        expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+        contentType: contentType,
+      };
 
-        const [url] = await this.storage
-          .bucket(this.bucketName)
-          .file(filename)
-          .getSignedUrl(options);
+      const [url] = await this.storage
+        .bucket(this.bucketName)
+        .file(filename)
+        .getSignedUrl(options);
 
-        return url;
-      }, `GCS generateUploadUrl (${filename})`);
+      return url;
     });
   }
 
@@ -95,23 +86,15 @@ class GCPService {
    * @returns {Promise<string>} - The public URL.
    */
   async uploadFile(filename, buffer, contentType) {
-    if (!this.storage) {
-      throw new Error(
-        "GCS is not configured. Please set GCP_KEY_FILE_PATH and GCP_PROJECT_ID in .env"
-      );
-    }
-
     return this.circuitBreaker.fire(async () => {
-      return withStorageRetry(async () => {
-        const file = this.storage.bucket(this.bucketName).file(filename);
+      const file = this.storage.bucket(this.bucketName).file(filename);
 
-        await file.save(buffer, {
-          metadata: { contentType },
-          resumable: false, // Simple upload for benchmark
-        });
+      await file.save(buffer, {
+        metadata: { contentType },
+        resumable: false, // Simple upload for benchmark
+      });
 
-        return `https://storage.googleapis.com/${this.bucketName}/${filename}`;
-      }, `GCS uploadFile (${filename})`);
+      return `https://storage.googleapis.com/${this.bucketName}/${filename}`;
     });
   }
 
