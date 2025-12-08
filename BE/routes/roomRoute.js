@@ -1,18 +1,12 @@
 import express from "express";
-// import { roomController } from "../controllers/roomController.js";
-// import { roomService } from "../services/roomService.js";
-import { roomRepo } from "../repositories/roomRepo.js";
-import { cacheManager } from "../utils/CacheManager.js";
-import { RoomService } from "../services/roomService.js";
-import { RoomController } from "../controllers/roomController.js";
+import { resolve } from "../config/serviceContainer.js";
 import { validate } from "../middlewares/validateMiddleware.js";
 import { createRoomSchema, updateRoomSchema, searchRoomSchema } from "../validations/roomValidation.js";
 import rateLimitMiddleware from "../middlewares/rateLimitMiddleware.js";
 import verifyTokenMiddleware from "../middlewares/verifyTokenMiddleware.js";
 
-// Dependency Injection
-const myRoomService = new RoomService(roomRepo, cacheManager);
-const myRoomController = new RoomController(myRoomService);
+// Resolve controller from DI container (with automatic dependency injection)
+const roomController = resolve('roomController');
 
 const Router = express.Router()
 Router.use(rateLimitMiddleware({ capacity: 20, refillRate: 1 }));
@@ -35,7 +29,7 @@ Router.use(rateLimitMiddleware({ capacity: 20, refillRate: 1 }));
  *               items:
  *                 type: object
  */
-Router.get("/", myRoomController.getRooms);
+Router.get("/", roomController.getRooms);
 
 /**
  * @swagger
@@ -55,7 +49,7 @@ Router.get("/", myRoomController.getRooms);
  *       404:
  *         description: Room not found
  */
-Router.get("/:id", myRoomController.getRoomDetails);
+Router.get("/:id", roomController.getRoomDetails);
 
 /**
  * @swagger
@@ -78,7 +72,7 @@ Router.get("/:id", myRoomController.getRoomDetails);
  *       200:
  *         description: List of rooms matching criteria
  */
-Router.post("/search", validate(searchRoomSchema), myRoomController.searchRooms);
+Router.post("/search", validate(searchRoomSchema), roomController.searchRooms);
 
 // Protected routes
 Router.use(verifyTokenMiddleware);
@@ -116,7 +110,7 @@ Router.use(verifyTokenMiddleware);
  *       201:
  *         description: Room created successfully
  */
-Router.post("/", validate(createRoomSchema), myRoomController.createRoom);
+Router.post("/", validate(createRoomSchema), roomController.createRoom);
 
 /**
  * @swagger
@@ -136,7 +130,7 @@ Router.post("/", validate(createRoomSchema), myRoomController.createRoom);
  *       200:
  *         description: Room deleted successfully
  */
-Router.delete("/:id", myRoomController.deleteRoom);
+Router.delete("/:id", roomController.deleteRoom);
 
 /**
  * @swagger
@@ -169,6 +163,6 @@ Router.delete("/:id", myRoomController.deleteRoom);
  *       200:
  *         description: Room updated successfully
  */
-Router.put("/:id", validate(updateRoomSchema), myRoomController.updateRoom);
+Router.put("/:id", validate(updateRoomSchema), roomController.updateRoom);
 export const roomRoute = Router;
 

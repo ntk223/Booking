@@ -3,7 +3,7 @@ import { Booking } from "../models/Model.js";
 import logger from "../logger/winston.log.js";
 
 class BookingService {
-    constructor(bookingRepo, redisClient, sequelize, cacheManager) {
+    constructor({ bookingRepo, redisClient, sequelize, cacheManager }) {
         this.bookingRepo = bookingRepo;
         this.redisClient = redisClient;
         this.sequelize = sequelize;

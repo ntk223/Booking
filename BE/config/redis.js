@@ -102,19 +102,6 @@ class SafeRedisClient {
         }
       );
     });
-    this.startHeartbeat();
-  }
-
-  /**
-   * Start periodic health check
-   */
-  startHeartbeat() {
-    setInterval(async () => {
-      try {
-        await this.ping();
-      } catch (err) {
-      }
-    }, 5000).unref();
   }
 
   /**
@@ -179,11 +166,31 @@ class SafeRedisClient {
   }
 
   /**
-   * Safe PING operation - Used for health checks
+   * Safe KEYS operation - Returns empty array if circuit is open or operation fails
+   * WARNING: Use with caution in production (blocking operation)
+   * Used for pattern matching deletion
+   */
+  async keys(pattern) {
+    try {
+      return await this.circuitBreaker.fire(async () => await this.client.keys(pattern));
+    } catch (error) {
+      if (error.code === 'EOPENBREAKER' || error.type === 'OpenCircuitError') {
+        return [];
+      }
+      logger.warn(`KEYS failed for pattern "${pattern}": ${error.message}`, {
+        utilService: "REDIS",
+      });
+      return [];
+    }
+  }
+
+  /**
+   * Safe PING operation - Used for health checks only (bypasses circuit breaker)
+   * Health checks should not affect circuit breaker state
    */
   async ping() {
-    // Use circuit breaker for ping too, so failures count towards opening the circuit
-    return await this.circuitBreaker.fire(async () => await this.client.ping());
+    // Direct ping, bypass circuit breaker - health checks shouldn't trigger circuit state
+    return await this.client.ping();
   }
 
   /**

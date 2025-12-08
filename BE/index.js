@@ -13,9 +13,10 @@ import logger from "./logger/winston.log.js";
 import { requestIdMiddleware } from "./middlewares/requestIdMiddleware.js";
 import { requestLoggerMiddleware } from "./middlewares/requestLoggerMiddleware.js";
 import { getMetrics, getContentType, httpRequestDurationMicroseconds } from "./utils/metrics.js";
-import { GCPService } from "./services/GCPService.js";
+import { resolve } from "./config/serviceContainer.js";
 
-const myGCPService = new GCPService();
+// Resolve GCPService from DI container (with automatic dependency injection)
+const myGCPService = resolve('gcpService');
 
 const START_SERVER = () => {
   const app = express();

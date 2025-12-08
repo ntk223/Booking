@@ -1,12 +1,11 @@
 
 import { rawRedisClient, safeRedisClient } from "./config/redis.js";
-import { BookingService } from "./services/bookingService.js";
-import { bookingRepo } from "./repositories/bookingRepo.js";
+import { resolve } from "./config/serviceContainer.js";
 import sequelize from "./config/database.js";
 import logger from "./logger/winston.log.js";
 
-import { cacheManager } from "./utils/CacheManager.js";
-const bookingService = new BookingService(bookingRepo, rawRedisClient, sequelize, cacheManager);
+// Resolve BookingService from DI container (with automatic dependency injection)
+const bookingService = resolve('bookingService');
 
 const QUEUE_KEY = "booking:queue";
 const PROCESSING_TIMEOUT = 1000;

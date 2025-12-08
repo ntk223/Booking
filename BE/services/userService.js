@@ -1,5 +1,5 @@
 class UserService {
-    constructor(userRepo, cacheManager) {
+    constructor({ userRepo, cacheManager }) {
         this.userRepo = userRepo;
         this.cacheManager = cacheManager;
     }

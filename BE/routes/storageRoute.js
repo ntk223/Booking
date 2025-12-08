@@ -1,15 +1,14 @@
 import express from "express";
-import { StorageController } from "../controllers/storageController.js";
-import { GCPService } from "../services/GCPService.js";
+import { resolve } from "../config/serviceContainer.js";
 import multer from "multer";
 
-const myGCPService = new GCPService();
-const myStorageController = new StorageController(myGCPService);
+// Resolve controller from DI container (with automatic dependency injection)
+const storageController = resolve('storageController');
 
 const Router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-Router.get("/upload-url", myStorageController.getUploadUrl);
-Router.post("/upload", upload.single("file"), myStorageController.uploadProxy);
+Router.get("/upload-url", storageController.getUploadUrl);
+Router.post("/upload", upload.single("file"), storageController.uploadProxy);
 
 export const storageRoute = Router;

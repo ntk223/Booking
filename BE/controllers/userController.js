@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { UserDTO } from "../dtos/UserDTO.js";
 
 export class UserController {
-  constructor(userService) {
+  constructor({ userService }) {
     this.userService = userService;
   }
 

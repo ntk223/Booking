@@ -1,14 +1,10 @@
 import express from "express";
-import { UserController } from "../controllers/userController.js";
-import { UserService } from "../services/userService.js";
-import { userRepo } from "../repositories/userRepo.js";
+import { resolve } from "../config/serviceContainer.js";
 import { validate } from "../middlewares/validateMiddleware.js";
 import { createUserSchema, updateUserSchema } from "../validations/userValidation.js";
-import { cacheManager } from "../utils/CacheManager.js";
 
-// Dependency Injection
-const myUserService = new UserService(userRepo, cacheManager);
-const myUserController = new UserController(myUserService);
+// Resolve controller from DI container (with automatic dependency injection)
+const userController = resolve('userController');
 
 const Router = express.Router();
 
@@ -45,7 +41,7 @@ const Router = express.Router();
  *       400:
  *         description: Invalid input
  */
-Router.post("/", validate(createUserSchema), myUserController.createUser);
+Router.post("/", validate(createUserSchema), userController.createUser);
 
 /**
  * @swagger
@@ -65,7 +61,7 @@ Router.post("/", validate(createUserSchema), myUserController.createUser);
  *               items:
  *                 type: object
  */
-Router.get("/", myUserController.getAllUsers);
+Router.get("/", userController.getAllUsers);
 
 /**
  * @swagger
@@ -87,7 +83,7 @@ Router.get("/", myUserController.getAllUsers);
  *       404:
  *         description: User not found
  */
-Router.delete("/:id", myUserController.deleteUser);
+Router.delete("/:id", userController.deleteUser);
 
 /**
  * @swagger
@@ -120,5 +116,5 @@ Router.delete("/:id", myUserController.deleteUser);
  *       404:
  *         description: User not found
  */
-Router.put("/:id", validate(updateUserSchema), myUserController.updateUser);
+Router.put("/:id", validate(updateUserSchema), userController.updateUser);
 export const userRoute = Router;
