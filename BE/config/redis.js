@@ -10,13 +10,7 @@ const redisClient = redis.createClient({
   disableOfflineQueue: true,
   socket: {
     reconnectStrategy: (retries) => {
-      if (retries > 10) {
-        logger.error("Redis max retries exceeded", {
-          utilService: "REDIS",
-        });
-        return new Error("Redis max retries exceeded");
-      }
-      return Math.min(retries * 50, 500);
+      return Math.min(retries * 50, 3000);
     },
   },
 });
