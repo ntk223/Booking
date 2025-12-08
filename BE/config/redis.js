@@ -3,6 +3,7 @@ import { env } from "./environment.js";
 import CircuitBreaker from "opossum";
 import logger from "../logger/winston.log.js";
 import { registerCircuitBreaker } from "../utils/metrics.js";
+import { withRedisRetry } from "../utils/retry.js";
 
 const redisClient = redis.createClient({
   url: `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`,
@@ -70,7 +71,10 @@ class SafeRedisClient {
 
     // Create circuit breaker wrapping a generic execution function
     // We pass the actual operation as an argument to fire()
-    this.circuitBreaker = new CircuitBreaker(async (operation) => operation(), options);
+    this.circuitBreaker = new CircuitBreaker(
+      async (operation) => operation(),
+      options
+    );
 
     // Register with Prometheus
     registerCircuitBreaker(this.circuitBreaker);
@@ -86,21 +90,15 @@ class SafeRedisClient {
     });
 
     this.circuitBreaker.on("close", () => {
-      logger.info(
-        "Redis circuit closed. Cache operations restored.",
-        {
-          utilService: "CIRCUIT_BREAKER",
-        }
-      );
+      logger.info("Redis circuit closed. Cache operations restored.", {
+        utilService: "CIRCUIT_BREAKER",
+      });
     });
 
     this.circuitBreaker.on("halfOpen", () => {
-      logger.info(
-        "Redis circuit half-open. Testing recovery...",
-        {
-          utilService: "CIRCUIT_BREAKER",
-        }
-      );
+      logger.info("Redis circuit half-open. Testing recovery...", {
+        utilService: "CIRCUIT_BREAKER",
+      });
     });
     this.startHeartbeat();
   }
@@ -122,10 +120,15 @@ class SafeRedisClient {
    */
   async get(key) {
     try {
-      return await this.circuitBreaker.fire(async () => await this.client.get(key));
+      return await this.circuitBreaker.fire(async () => {
+        return withRedisRetry(
+          async () => await this.client.get(key),
+          `Redis GET (${key})`
+        );
+      });
     } catch (error) {
       // If circuit is open or request failed, treat as cache miss
-      if (error.code === 'EOPENBREAKER' || error.type === 'OpenCircuitError') {
+      if (error.code === "EOPENBREAKER" || error.type === "OpenCircuitError") {
         // Circuit is open, gracefully degrade
         return null;
       }
@@ -143,10 +146,15 @@ class SafeRedisClient {
    */
   async set(key, value, options) {
     try {
-      await this.circuitBreaker.fire(async () => await this.client.set(key, value, options));
+      await this.circuitBreaker.fire(async () => {
+        return withRedisRetry(
+          async () => await this.client.set(key, value, options),
+          `Redis SET (${key})`
+        );
+      });
       return true;
     } catch (error) {
-      if (error.code === 'EOPENBREAKER' || error.type === 'OpenCircuitError') {
+      if (error.code === "EOPENBREAKER" || error.type === "OpenCircuitError") {
         // Circuit is open, skip caching silently
         return true;
       }
@@ -163,10 +171,15 @@ class SafeRedisClient {
    */
   async del(key) {
     try {
-      await this.circuitBreaker.fire(async () => await this.client.del(key));
+      await this.circuitBreaker.fire(async () => {
+        return withRedisRetry(
+          async () => await this.client.del(key),
+          `Redis DEL (${key})`
+        );
+      });
       return true;
     } catch (error) {
-      if (error.code === 'EOPENBREAKER' || error.type === 'OpenCircuitError') {
+      if (error.code === "EOPENBREAKER" || error.type === "OpenCircuitError") {
         // Circuit is open, skip invalidation silently
         return true;
       }
