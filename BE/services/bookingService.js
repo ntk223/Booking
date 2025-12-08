@@ -1,14 +1,23 @@
 import { Op } from "sequelize";
 import { Booking } from "../models/Model.js";
+import logger from "../logger/winston.log.js";
 
 class BookingService {
-    constructor(bookingRepo, redisClient, sequelize) {
+    constructor(bookingRepo, redisClient, sequelize, cacheManager) {
         this.bookingRepo = bookingRepo;
         this.redisClient = redisClient;
         this.sequelize = sequelize;
+        this.cacheManager = cacheManager;
     }
 
-    async createBooking(bookingData) {
+    async queueBooking(bookingData) {
+        // Push booking data to Redis Queue
+        const QUEUE_KEY = "booking:queue";
+        await this.redisClient.lPush(QUEUE_KEY, JSON.stringify(bookingData));
+        return true;
+    }
+
+    async processBookingRequest(bookingData) {
         // Create distributed lock key
         const lockKey = `booking:lock:${bookingData.roomId}:${bookingData.date}:${bookingData.startTime}`;
         const lockValue = `${Date.now()}-${Math.random()}`;
@@ -52,7 +61,12 @@ class BookingService {
                     throw new Error("Room is already booked for the selected time slot.");
                 }
 
-                return await this.bookingRepo.createBooking(bookingData, t);
+                const newBooking = await this.bookingRepo.createBooking(bookingData, t);
+
+                // Invalidate User History Cache
+                await this.cacheManager.del(`bookings:user:${bookingData.userId}`);
+
+                return newBooking;
             });
         } catch (error) {
             throw error;
@@ -66,14 +80,19 @@ class BookingService {
                         await this.redisClient.del(lockKey);
                     }
                 } catch (err) {
-                    console.error('[ERROR] Failed to release Redis lock:', err.message);
+                    logger.error('Failed to release Redis lock', {
+                        error: err.message,
+                        lockKey,
+                        lockValue,
+                        utilService: 'BOOKING_SERVICE'
+                    });
                 }
             }
         }
     }
 
-    async getAllBookings() {
-        return await this.bookingRepo.getBookingDetails();
+    async getAllBookings(page = 1) {
+        return await this.bookingRepo.getBookingDetails(null, page);
     }
 
     async deleteBooking(bookingId) {
@@ -81,7 +100,36 @@ class BookingService {
     }
 
     async updateBookingStatus(bookingId, status) {
-        return await this.bookingRepo.updateBookingStatus(bookingId, status);
+        const result = await this.bookingRepo.updateBookingStatus(bookingId, status);
+        // We need userId to invalidate cache. 
+        // Ideally we should fetch booking first, but that adds overhead.
+        // Alternatively, we can clear ALL user caches? No.
+        // Let's fetch the booking briefly to get userId.
+        try {
+            const booking = await this.bookingRepo.findById(bookingId);
+            if (booking) {
+                await this.cacheManager.del(`bookings:user:${booking.userId}`);
+                logger.info('Cache invalidated after booking status update', {
+                    bookingId,
+                    userId: booking.userId,
+                    newStatus: status,
+                    utilService: 'BOOKING_SERVICE'
+                });
+            } else {
+                logger.warn('Booking not found for cache invalidation', {
+                    bookingId,
+                    utilService: 'BOOKING_SERVICE'
+                });
+            }
+        } catch (err) {
+            logger.error('Failed to invalidate cache after booking status update', {
+                error: err.message,
+                bookingId,
+                status,
+                utilService: 'BOOKING_SERVICE'
+            });
+        }
+        return result;
     }
 
     async getBookingDetails(bookingId) {
@@ -89,7 +137,11 @@ class BookingService {
     }
 
     async getBookingsByUser(userId) {
-        return await this.bookingRepo.getBookingsByUserId(userId);
+        // Cache key: bookings:user:{userId}
+        const key = `bookings:user:${userId}`;
+        return await this.cacheManager.getOrSet(key, async () => {
+            return await this.bookingRepo.getBookingsByUserId(userId);
+        }, 300); // 5 minutes TTL
     }
 }
 

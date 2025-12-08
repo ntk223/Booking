@@ -12,8 +12,8 @@ export class BookingController {
   createBooking = asyncHandler(async (req, res) => {
     try {
       const bookingData = req.body;
-      const newBooking = await this.bookingService.createBooking(bookingData);
-      res.status(StatusCodes.CREATED).json(new BookingDTO(newBooking));
+      await this.bookingService.queueBooking(bookingData);
+      res.status(StatusCodes.ACCEPTED).json({ message: "Booking request received", status: "processing" });
     } catch (error) {
       if (
         error.message.includes("already booked") ||
@@ -32,8 +32,13 @@ export class BookingController {
   });
 
   getAllBookings = asyncHandler(async (req, res) => {
-    const bookings = await this.bookingService.getAllBookings();
-    res.status(StatusCodes.OK).json(bookings.map(b => new BookingDTO(b)));
+    const page = parseInt(req.query.page) || 1;
+    const data = await this.bookingService.getAllBookings(page);
+    res.status(StatusCodes.OK).json({
+      bookings: data.bookings.map(b => new BookingDTO(b)),
+      currentPage: data.currentPage,
+      totalPages: data.totalPages
+    });
   });
 
   getBookingDetails = asyncHandler(async (req, res) => {

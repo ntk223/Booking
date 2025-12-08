@@ -10,6 +10,7 @@ class RoomService {
         const { roomCreated, currentPage } = await this.roomRepo.createRoom(roomData);
         // Invalidate relevant cache
         await this.cacheManager.delPattern('room:page:*');
+        await this.cacheManager.delPattern('room:search:*'); // Invalidate search cache
         return roomCreated;
     }
 
@@ -26,6 +27,7 @@ class RoomService {
         const { totalPages, currentPage } = await this.roomRepo.deleteRoom(roomId);
         // Invalidate all pages to be safe and simple
         await this.cacheManager.delPattern('room:page:*');
+        await this.cacheManager.delPattern('room:search:*'); // Invalidate search cache
         await this.cacheManager.del(`room:${roomId}`);
         return true;
     }
@@ -34,6 +36,7 @@ class RoomService {
         if (!this._isValidRoomId(roomId)) return null;
         const { room, currentPage } = await this.roomRepo.updateRoom(roomId, updatedData);
         await this.cacheManager.delPattern('room:page:*');
+        await this.cacheManager.delPattern('room:search:*'); // Invalidate search cache
         await this.cacheManager.del(`room:${roomId}`);
         return room;
     }
@@ -47,7 +50,10 @@ class RoomService {
     }
 
     async searchRooms(criteria) {
-        return await this.roomRepo.searchRooms(criteria);
+        const cacheKey = `room:search:${JSON.stringify(criteria)}`;
+        return await this.cacheManager.getOrSet(cacheKey, async () => {
+            return await this.roomRepo.searchRooms(criteria);
+        }, 60);
     }
 
     _isValidRoomId(roomId) {

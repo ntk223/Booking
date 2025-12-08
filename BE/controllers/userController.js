@@ -14,8 +14,13 @@ export class UserController {
   });
 
   getAllUsers = asyncHandler(async (req, res) => {
-    const users = await this.userService.getAllUsers();
-    res.status(StatusCodes.OK).json(users.map(u => new UserDTO(u)));
+    const page = parseInt(req.query.page) || 1;
+    const { users, currentPage, totalPages } = await this.userService.getAllUsers(page);
+    res.status(StatusCodes.OK).json({
+      users: users.map(u => new UserDTO(u)),
+      currentPage,
+      totalPages
+    });
   });
 
   deleteUser = asyncHandler(async (req, res) => {
