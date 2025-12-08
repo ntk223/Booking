@@ -10,6 +10,7 @@ const redisClient = redis.createClient({
   disableOfflineQueue: true,
   socket: {
     reconnectStrategy: (retries) => {
+      // Infinite retries: Wait 50ms, 100ms, ... up to max 3000ms (3s)
       return Math.min(retries * 50, 3000);
     },
   },
@@ -60,12 +61,12 @@ class SafeRedisClient {
 
     // Options for Opossum
     const options = {
-      name: "redis-circuit-breaker", // Name is important for metrics
-      timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // If function takes longer than 30s, trigger failure
-      errorThresholdPercentage:
-        (env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || 0.5) * 100, // 50%
-      resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000, // Wait 30s before trying again (Half-Open)
-      volumeThreshold: 5, // minRequestCount
+      name: 'redis-circuit-breaker', // Name is important for metrics
+      timeout: env.CIRCUIT_BREAKER_TIMEOUT, // If function takes longer than this, trigger failure
+      errorThresholdPercentage: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD * 100,
+      resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT, // Wait before trying again (Half-Open)
+      volumeThreshold: env.CIRCUIT_BREAKER_VOLUME_THRESHOLD, // Minimum requests before circuit can open
+      rollingCountTimeout: env.CIRCUIT_BREAKER_ROLLING_COUNT_TIMEOUT, // Rolling window for failure rate calculation
     };
 
     // Create circuit breaker wrapping a generic execution function
@@ -99,6 +100,19 @@ class SafeRedisClient {
         utilService: "CIRCUIT_BREAKER",
       });
     });
+    this.startHeartbeat();
+  }
+
+  /**
+   * Start periodic health check
+   */
+  startHeartbeat() {
+    setInterval(async () => {
+      try {
+        await this.ping();
+      } catch (err) {
+      }
+    }, 5000).unref();
   }
 
   /**
@@ -181,7 +195,8 @@ class SafeRedisClient {
    * Safe PING operation - Used for health checks
    */
   async ping() {
-    return await this.client.ping();
+    // Use circuit breaker for ping too, so failures count towards opening the circuit
+    return await this.circuitBreaker.fire(async () => await this.client.ping());
   }
 
   /**

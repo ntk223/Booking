@@ -13,7 +13,7 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true, mode: 0o755 });
 }
 
-const { combine, errors, timestamp, splat, printf } = winston.format;
+const { combine, errors, timestamp, splat, printf, json } = winston.format;
 
 const textFormat = printf(
   ({
@@ -59,7 +59,7 @@ const logger = winston.createLogger({
     timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
     errors({ stack: true }),
     splat(),
-    textFormat
+    json()
   ),
   transports: [
     new winston.transports.Console(),

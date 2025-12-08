@@ -18,6 +18,20 @@ const Booking = sequelize.define("Booking", {
   timestamps: true,
   paranoid: true,
   underscored: true,
+  indexes: [
+    {
+      name: 'booking_overlap_idx',
+      fields: ['room_id', 'date', 'start_time', 'end_time']
+    },
+    {
+      name: 'booking_user_idx',
+      fields: ['user_id']
+    },
+    {
+      name: 'booking_status_idx',
+      fields: ['status']
+    }
+  ]
 });
 
 export default Booking;

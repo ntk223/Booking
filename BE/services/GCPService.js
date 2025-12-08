@@ -29,14 +29,14 @@ class GCPService {
       this.bucketName = process.env.GCP_BUCKET_NAME;
     }
 
-    const options = {
-      name: "gcs-circuit-breaker",
-      timeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000,
-      errorThresholdPercentage:
-        (env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || 0.5) * 100,
-      resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT || 30000,
-      volumeThreshold: 5,
-    };
+        const options = {
+            name: 'gcs-circuit-breaker',
+            timeout: env.CIRCUIT_BREAKER_TIMEOUT,
+            errorThresholdPercentage: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD * 100,
+            resetTimeout: env.CIRCUIT_BREAKER_TIMEOUT,
+            volumeThreshold: env.CIRCUIT_BREAKER_VOLUME_THRESHOLD,
+            rollingCountTimeout: env.CIRCUIT_BREAKER_ROLLING_COUNT_TIMEOUT,
+        };
 
     this.circuitBreaker = new CircuitBreaker(
       async (operation) => operation(),

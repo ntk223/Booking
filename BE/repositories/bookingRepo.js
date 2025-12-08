@@ -10,49 +10,57 @@ class BookingRepository extends BaseRepository {
         return await this.create(bookingData, { transaction });
     }
 
-    async getBookingDetails(bookingId = null) {
-        const whereClause = bookingId ? { id: bookingId } : {};
-        const bookings = await this.findAll({
-            attributes: [
-                "id",
-                "date",
-                "startTime",
-                "endTime",
-                "status",
-                "createdAt",
-                "roomId",
-                "userId",
-            ],
-            include: [
-                {
-                    model: Room,
-                    as: "room",
-                    attributes: ["name"],
-                },
-                {
-                    model: User,
-                    as: "user",
-                    attributes: ["name"],
-                },
-            ],
-            where: whereClause,
-            raw: true,
-            nest: true,
-        });
+    async getBookingDetails(bookingId = null, page = 1) {
+        if (bookingId) {
+            const bookings = await this.findAll({
+                attributes: ["id", "date", "startTime", "endTime", "status", "createdAt", "roomId", "userId"],
+                include: [
+                    { model: Room, as: "room", attributes: ["name"] },
+                    { model: User, as: "user", attributes: ["name"] },
+                ],
+                where: { id: bookingId },
+                raw: true,
+                nest: true,
+            });
+            return bookings.map((b) => ({
+                bookingId: b.id,
+                date: b.date,
+                startTime: b.startTime,
+                endTime: b.endTime,
+                status: b.status,
+                createdAt: b.createdAt,
+                roomId: b.roomId,
+                roomName: b.room?.name || null,
+                userId: b.userId,
+                userName: b.user?.name || null,
+            }));
+        } else {
+            const { data, currentPage, totalPages } = await this.paginate(page, {
+                attributes: ["id", "date", "startTime", "endTime", "status", "createdAt", "roomId", "userId"],
+                include: [
+                    { model: Room, as: "room", attributes: ["name"] },
+                    { model: User, as: "user", attributes: ["name"] },
+                ],
+                raw: true,
+                nest: true,
+            });
 
-        // Format result
-        return bookings.map((b) => ({
-            bookingId: b.id,
-            date: b.date,
-            startTime: b.startTime,
-            endTime: b.endTime,
-            status: b.status,
-            createdAt: b.createdAt,
-            roomId: b.roomId,
-            roomName: b.room?.name || null,
-            userId: b.userId,
-            userName: b.user?.name || null,
-        }));
+            const formattedBookings = data.map((b) => ({
+                bookingId: b.id,
+                date: b.date,
+                startTime: b.startTime,
+                endTime: b.endTime,
+                status: b.status,
+                createdAt: b.createdAt,
+                roomId: b.roomId,
+                roomName: b.room?.name || null,
+                userId: b.userId,
+                userName: b.user?.name || null,
+            }));
+
+            return { bookings: formattedBookings, currentPage, totalPages };
+        }
+
     }
 
     async updateBookingStatus(bookingId, status) {

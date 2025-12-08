@@ -5,10 +5,11 @@ import { bookingRepo } from "../repositories/bookingRepo.js";
 import { rawRedisClient } from "../config/redis.js";
 import sequelize from "../config/database.js";
 import { validate } from "../middlewares/validateMiddleware.js";
+import { cacheManager } from "../utils/CacheManager.js";
 import { createBookingSchema, updateBookingStatusSchema } from "../validations/bookingValidation.js";
 
 // Dependency Injection
-const myBookingService = new BookingService(bookingRepo, rawRedisClient, sequelize);
+const myBookingService = new BookingService(bookingRepo, rawRedisClient, sequelize, cacheManager);
 const myBookingController = new BookingController(myBookingService);
 
 const Router = express.Router();

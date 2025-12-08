@@ -1,0 +1,6 @@
+#config mysql-exporter
+[client]
+user=exporter
+password=12345678
+host=booking_mysql
+port=3306

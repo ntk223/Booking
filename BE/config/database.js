@@ -6,6 +6,16 @@ const sequelize = new Sequelize(env.DB_NAME, env.DB_USER, env.DB_PASS, {
   port: env.DB_PORT,
   dialect: "mysql",
   logging: false,
+  // Performance optimizations
+  pool: {
+    max: 5,           // Maximum connections in pool
+    min: 2,           // Minimum connections in pool
+    acquire: 30000,   // Max time to acquire connection
+    idle: 10000,      // Max time before idle connection is released
+  },
+  dialectOptions: {
+    connectTimeout: 10000,
+  },
 });
 
 async function connectToDatabase() {
@@ -16,16 +26,15 @@ async function connectToDatabase() {
     );
   } catch (error) {
     logger.error("Unable to connect to the database:", error.message);
-    logger.error("Please ensure MySQL is running and accessible");
-    logger.error(
-      `Connection string: ${env.DB_USER}@${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}\n`
-    );
-    logger.info("To start database with Docker: docker-compose up -d mysql");
-    process.exit(1);
+    logger.error("Retrying in 5 seconds...");
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    return connectToDatabase();
   }
 }
 
-connectToDatabase();
-// await sequelize.sync({ alter: true });
+if (process.env.NODE_ENV !== 'test') {
+  connectToDatabase();
+}
+await sequelize.sync({ alter: true });
 
 export default sequelize;
