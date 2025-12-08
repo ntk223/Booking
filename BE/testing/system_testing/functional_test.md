@@ -1,5 +1,6 @@
 # Kịch Bản Kiểm Thử Chức Năng
 ### Phương tiện kiểm thử: thủ công bằng giao diện và postman
+### Kết quả test: [Result](https://docs.google.com/spreadsheets/d/1Lrd8j34JM3l0PS4WBZVkIHIUeLoPkpeWarTot8qpzr0/edit?gid=0#gid=0)
 
 ## 1. Register
 
@@ -26,7 +27,7 @@
 ```json
 {
   "name": "Nguyen Van A",
-  "email": "nguyenvana@example.com",
+  "email": "nguyenvana@gmail.com",
   "password": "password123",
   "phone": "0123456789",
 }
@@ -38,7 +39,7 @@
 {
   "id": "number",
   "name": "Nguyen Van A",
-  "email": "nguyenvana@example.com",
+  "email": "nguyenvana@gmail.com",
   "phone": "0123456789",
   "role": "user",
   "createdAt": "timestamp"
@@ -63,7 +64,7 @@
 ```json
 {
   "name": "Tran Thi B",
-  "email": "tranthib@example.com",
+  "email": "tranthib@gmail.com",
   "password": "password123"
 }
 ```
@@ -74,14 +75,13 @@
 {
   "id": "number",
   "name": "Tran Thi B",
-  "email": "tranthib@example.com",
+  "email": "tranthib@gmail.com",
   "phone": null,
   "role": "user",
   "createdAt": "timestamp"
 }
 ```
-- **Hiển thị Frontend**: Chuyển hướng đến trang đăng nhập với thông báo "Đăng ký thành công"
-
+- **Hiển thị Frontend**: Bắt buộc phải điển phone
 ---
 
 ### **REG-3: Đăng ký thất bại - Thiếu trường name**
@@ -94,7 +94,7 @@
 - Request body:
 ```json
 {
-  "email": "test@example.com",
+  "email": "test@gmail.com",
   "password": "password123"
 }
 ```
@@ -148,7 +148,7 @@
 ```json
 {
   "name": "Test",
-  "email": "test@example.com"
+  "email": "test@gmail.com"
 }
 ```
 
@@ -174,8 +174,8 @@
 - Request body:
 ```json
 {
-  "name": "Test User",
-  "email": "invalid-email-format",
+  "name": "Test",
+  "email": "mmmmmmmmmm",
   "password": "password123"
 }
 ```
@@ -198,7 +198,7 @@
 **Mục đích**: Kiểm tra hệ thống không cho phép đăng ký với email đã được sử dụng
 
 **Điều kiện**: 
-- Email "existing@example.com" đã tồn tại trong database
+- Email "existing@gmail.com" đã tồn tại trong database
 
 **Input**:
 - Method: `POST`
@@ -207,7 +207,7 @@
 ```json
 {
   "name": "Another",
-  "email": "tranthib@example.com",
+  "email": "tranthib@gmail.com",
   "password": "password123"
 }
 ```
@@ -218,6 +218,7 @@
 ```json
 {
   "message": "Email already exists"
+}
 ```
 - **Hiển thị Frontend**: Thông báo lỗi "Đăng kí thất bại"
 
@@ -242,7 +243,7 @@
 **Mục đích**: Kiểm tra người dùng có thể đăng nhập thành công với email và password đúng
 
 **Điều kiện**: 
-- User với email "nguyenvana@example.com" và password "password123" đã tồn tại trong hệ thống
+- User với email "nguyenvana@gmail.com" và password "password123" đã tồn tại trong hệ thống
 
 **Input**:
 - Method: `POST`
@@ -250,7 +251,7 @@
 - Request body:
 ```json
 {
-  "email": "nguyenvana@example.com",
+  "email": "nguyenvana@gmail.com",
   "password": "password123"
 }
 ```
@@ -264,7 +265,7 @@
   "user": {
     "id": "number",
     "name": "string",
-    "email": "nguyenvana@example.com",
+    "email": "nguyenvana@gmail.com",
     "phone": "string",
     "role": "user",
     "createdAt": "timestamp"
@@ -280,7 +281,7 @@
 **Mục đích**: Kiểm tra hệ thống xử lý khi đăng nhập với email chưa đăng ký
 
 **Điều kiện**: 
-- Email "nonexistent@example.com" không tồn tại trong hệ thống
+- Email "nonexistent@gmail.com" không tồn tại trong hệ thống
 
 **Input**:
 - Method: `POST`
@@ -288,7 +289,7 @@
 - Request body:
 ```json
 {
-  "email": "nonexistent@example.com",
+  "email": "nonexistent@gmail.com",
   "password": "password123"
 }
 ```
@@ -310,7 +311,7 @@
 **Mục đích**: Kiểm tra hệ thống xử lý khi đăng nhập với password sai
 
 **Điều kiện**: 
-- User với email "nguyenvana@example.com" đã tồn tại trong hệ thống
+- User với email "nguyenvana@gmail.com" đã tồn tại trong hệ thống
 - Password đúng là "password123"
 
 **Input**:
@@ -319,7 +320,7 @@
 - Request body:
 ```json
 {
-  "email": "nguyenvana@example.com",
+  "email": "nguyenvana@gmail.com",
   "password": "password1234"
 }
 ```
@@ -372,7 +373,7 @@
 - Request body:
 ```json
 {
-  "email": "nguyenvana@example.com"
+  "email": "nguyenvana@gmail.com"
 }
 ```
 
@@ -504,7 +505,7 @@
   "capacity": 10,
   "price": 200000,
   "districtId": "1",
-  "imageUrl": "https://example.com/room.jpg",
+  "imageUrl": "https://gmail.com/room.jpg",
   "description": "Phòng học nhỏ, đầy đủ tiện nghi",
   "equipments": [...]
 }
@@ -693,7 +694,7 @@
 ```json
 []
 ```
-- **Hiển thị Frontend**: Hiển thị thông báo "Không tìm thấy phòng" 
+- **Hiển thị Frontend**: Hiển thị trang "Không tìm thấy phòng" và nút quay lại danh sách phòng
 ---
 
 ## 4. Đặt Phòng (Booking)
@@ -711,7 +712,7 @@
 
 **Điều kiện**: 
 - User đã đăng nhập (có token hợp lệ)
-- Phòng với roomId="1" tồn tại
+- Phòng với roomId="11" tồn tại
 - Phòng chưa được đặt trong khung giờ yêu cầu
 
 **Input**:
@@ -720,8 +721,8 @@
 - Request body:
 ```json
 {
-  "roomId": "1",
-  "userId": "1",
+  "roomId": "11",
+  "userId": "3",
   "date": "2025-12-15",
   "startTime": 9,
   "endTime": 11
@@ -744,7 +745,7 @@
 }
 ```
 - Booking được lưu vào database
-- **Hiển thị Frontend**: Chuyển hướng đến trang "Thank You" và thông báo "Đặt phòng thành công"
+- **Hiển thị Frontend**: thông báo "Đặt phòng thành công"
 
 ---
 
@@ -768,11 +769,11 @@
 ```
 
 **Expected Output**:
-- Status Code: `400 Bad Request`
+- Status Code: `500 Server Error`
 - Response body:
 ```json
 {
-  "message": "Room ID is required"
+  "message":  "WHERE parameter \"room_id\" has invali\"undefined\" value"
 }
 ```
 - Không tạo booking trong database
@@ -800,7 +801,7 @@
 ```
 
 **Expected Output**:
-- Status Code: `400 Bad Request`
+- Status Code: `500 server error`
 - Response body:
 ```json
 {
@@ -1047,7 +1048,7 @@
 - Request body:
 ```json
 {
-  "email": "k@example.com",
+  "email": "k@gmail.com",
   "password": "1234"
 }
 ```
@@ -1061,7 +1062,7 @@
   "user": {
     "id": "number",
     "name": "string",
-    "email": "k@example.com",
+    "email": "k@gmail.com",
     "phone": "string",
     "role": "admin",
     "createdAt": "timestamp"
@@ -1083,7 +1084,7 @@
 - Request body:
 ```json
 {
-  "email": "nguyenvana@example.com",
+  "email": "nguyenvana@gmail.com",
   "password": "password123"
 }
 ```
@@ -1097,7 +1098,7 @@
   "user": {
     "id": "number",
     "name": "Nguyen Van A",
-    "email": "nguyenvana@example.com",
+    "email": "nguyenvana@gmail.com",
     "phone": "0123456789",
     "role": "user",
     "createdAt": "timestamp"
@@ -1127,7 +1128,7 @@
   "capacity": 20,
   "price": 500000,
   "districtId": "1",
-  "imageUrl": "https://example.com/room-a101.jpg",
+  "imageUrl": "https://gmail.com/room-a101.jpg",
   "description": "Phòng họp lớn, đầy đủ tiện nghi"
 }
 ```
@@ -1143,7 +1144,7 @@
   "capacity": 20,
   "price": 500000,
   "districtId": "1",
-  "imageUrl": "https://example.com/room-a101.jpg",
+  "imageUrl": "https://gmail.com/room-a101.jpg",
   "description": "Phòng họp lớn, đầy đủ tiện nghi",
   "createdAt": "timestamp"
 }
@@ -1201,11 +1202,11 @@
 ```
 
 **Expected Output**:
-- Status Code: `403 Forbidden`
+- Status Code: `401 Unauthorized`
 - Response body:
 ```json
 {
-  "message": "Access denied."
+  "message": "No token provided."
 }
 ```
 - **Hiển thị Frontend**: 
@@ -1243,7 +1244,7 @@
   "capacity": 25,
   "price": 600000,
   "districtId": "1",
-  "imageUrl": "https://example.com/room-a101.jpg",
+  "imageUrl": "https://gmail.com/room-a101.jpg",
   "description": "Phòng họp lớn, đầy đủ tiện nghi",
   "updatedAt": "timestamp"
 }
@@ -1353,14 +1354,14 @@
   {
     "id": 1,
     "name": "Nguyen Van A",
-    "email": "nguyenvana@example.com",
+    "email": "nguyenvana@gmail.com",
     "phone": "0123456789",
     "role": "user",
   },
   {
     "id": 2,
     "name": "Tran Thi B",
-    "email": "tranthib@example.com",
+    "email": "tranthib@gmail.com",
     "phone": "",
     "role": "user",
   }
